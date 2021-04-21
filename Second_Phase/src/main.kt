@@ -1,5 +1,8 @@
+import kotlin.reflect.KClass
+import kotlin.reflect.full.declaredMemberProperties
+
 fun main(){
-    val jsonObject = JsonObject()
+/*    val jsonObject = JsonObject()
     val jsonNumber1 = JsonNumber(123123)
     val jsonString1 = JsonString("Tiago")
     val jsonNull1 = JsonNull(null)
@@ -57,7 +60,9 @@ fun main(){
     jsonObject2.setProperty("MEI_Student",jsonObject)
 
     print(passJsonObjectToTextual(jsonObject) + "\n")
-    println(passJsonObjectToTextual(jsonObject2))
+    println(passJsonObjectToTextual(jsonObject2))*/
+
+    getTypes(studentAlfredo)
 
 }
 

@@ -1,12 +1,5 @@
 import javax.lang.model.type.NullType
 
-data class Student(
-        val number: Int,
-        val name: String,
-        val type: StudentType
-)
-enum class StudentType {Bachelor, Master, Doctoral}
-
 interface Visitor {
     fun visit(s: JsonString) {}
     fun visit(o: JsonObject) {}
