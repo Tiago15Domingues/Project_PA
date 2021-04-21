@@ -136,8 +136,8 @@ fun passJsonObjectToTextual(objectJson: JsonObject): String {
     objectJson.accept(findStrings)
     objectJson.accept(findObjectWithSpecificString)
 
-    println("All object Strings and there keys -> " + findStrings.results)
-    println("All object where is a String 'Peka' and there keys (Object | String) -> " + findObjectWithSpecificString.results/*[0].jsonObjectContent*/)
+    println("All object Strings and their keys -> " + findStrings.results)
+    println("All object where is a String 'Peka' and their keys (Object | String) -> " + findObjectWithSpecificString.results/*[0].jsonObjectContent*/)
 
     return toTextual.jsonTextual
 }

@@ -62,7 +62,6 @@ fun main(){
     print(passJsonObjectToTextual(jsonObject) + "\n")
     println(passJsonObjectToTextual(jsonObject2))*/
 
-    getTypes(studentAlfredo)
-
+    println(passJsonObjectToTextual(returnFun(studentAlfredo,JSON()) as JsonObject))
 }
 
