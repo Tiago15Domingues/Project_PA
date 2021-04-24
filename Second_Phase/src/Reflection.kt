@@ -27,7 +27,7 @@ fun mapObject(o: KClassifier?, call: Any?): JsonElement {
                             type = jsonObject
                         } else {
                             if (o == Student::class) {
-                                type = getJSON(call)
+                                type = getJSON(call) as JsonElement
                             }
                         }
                     }

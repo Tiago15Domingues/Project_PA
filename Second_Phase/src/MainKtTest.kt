@@ -152,7 +152,7 @@ internal class MainKtTest {
                 "\t\"number\": 83605,\n" +
                 "\t\"repeting\": false,\n" +
                 "\t\"studentType\": \"Master\"\n" +
-                "}", passJsonElementToTextual(getJSONList(mutableListOf(studentMaleiro, studentAlfredo))[0]))
-        assertEquals(mutableListOf(JsonObject())::class,(getJSONList(mutableListOf(studentMaleiro, studentAlfredo)))::class)
+                "}", passJsonElementToTextual((getJSON(mutableListOf(studentMaleiro, studentAlfredo))as MutableList<JsonElement>)[0]))
+        assertEquals(mutableListOf(JsonObject())::class,(getJSON(mutableListOf(studentMaleiro, studentAlfredo)))::class)
     }
 }
