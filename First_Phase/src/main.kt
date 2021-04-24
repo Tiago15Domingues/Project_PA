@@ -1,5 +1,3 @@
-import kotlin.reflect.KClass
-
 fun main(){
     val jsonObject = JsonObject()
     val jsonNumber1 = JsonNumber(123123)
@@ -55,15 +53,15 @@ fun main(){
     jsonObject3.setProperty("born",jsonString6)
     jsonObject.setProperty("home",jsonObject3)
 
-    //val jsonObject2 = JsonObject()
-    //jsonObject2.setProperty("MEI_Student",jsonObject)
+    val jsonObject2 = JsonObject()
+    jsonObject2.setProperty("MEI_Student",jsonObject)
 
-    findStrings(jsonObject)
-    findObjectWithSpecificString(jsonObject)
-    print(passJsonObjectToTextual(jsonObject) + "\n")
-    //findStrings(jsonObject2)
-    //findObjectWithSpecificString(jsonObject2)
-    //println(passJsonObjectToTextual(jsonObject2))
+    findAllStrings(jsonObject)
+    findJsonObjectWithSpecificString(jsonObject,"Peka")
+    print(passJsonElementToTextual(jsonObject) + "\n")
+    findAllStrings(jsonObject2)
+    findJsonObjectWithSpecificString(jsonObject2,"Peka")
+    println(passJsonElementToTextual(jsonObject2))
 }
 fun giveTabs(depth: Int): String {
     var tab = ""
@@ -95,7 +93,7 @@ fun giveEndTextualToContinuosLineJsonElement(elementJSON: JsonElement,textualJSO
         giveTabs(depth-1) + "$keyways,\n"
     } else {
         if(parent == null){
-            giveTabs(depth-1) + "$keyways"
+            giveTabs(depth-1) + keyways
         }else {
             giveTabs(depth - 1) + "$keyways\n"
         }
@@ -112,7 +110,7 @@ fun giveStartTextualToContinuosLineJsonElement(elementJSON: JsonElement,textualJ
     }
     return jsonTextual
 }
-fun passJsonObjectToTextual(objectJson: JsonElement): String {
+fun passJsonElementToTextual(objectJson: JsonElement): String {
 
     val toTextual = object : Visitor {
         var jsonTextual = ""
@@ -152,7 +150,7 @@ fun passJsonObjectToTextual(objectJson: JsonElement): String {
 
     return toTextual.jsonTextual
 }
-fun findStrings(objectJson: JsonElement): MutableList<String> {
+fun findAllStrings(objectJson: JsonElement): MutableList<String> {
     val findStrings = object : Visitor {
         var results = mutableListOf<String>()
         override fun visit(s: JsonString) {
@@ -164,24 +162,21 @@ fun findStrings(objectJson: JsonElement): MutableList<String> {
     println("All Strings -> " + findStrings.results)
     return findStrings.results
 }
-fun findObjectWithSpecificString(objectJson: JsonElement): MutableList<JsonElement> {
+fun findJsonObjectWithSpecificString(objectJson: JsonElement,string: String): MutableList<JsonElement> {
     val findObjectWithSpecificString = object : Visitor {
         var resultsToPrint = mutableListOf<Pair<String,JsonElement>>()
-        var results = mutableListOf<JsonElement>()
+        var results = mutableListOf<JsonElement>() //Apenas para uma questão de prints e verificar se bate tudo certo
         var obj = objectJson
-        var objectKey : String? = ""
-        var stringKey : String? = ""
+        var objectKey : String? = "" //Apenas para uma questão de prints e verificar se bate tudo certo
+        var stringKey : String? = "" //Apenas para uma questão de prints e verificar se bate tudo certo
         override fun visit(o: JsonObject): Boolean {
             obj = o
             return true
         }
         override fun visit(s: JsonString) {
-            println(obj)
-            if(s.value == "Peka") {
+            if(s.value == string) {
                 if (!results.contains(obj)) {
-                    println(results)
                     results.add(obj)
-                    println(results)
                     if (s.key != null) stringKey = s.key
                     if (obj.key != null) objectKey = obj.key
                     resultsToPrint.add(Pair("$objectKey | $stringKey", obj))
@@ -189,9 +184,7 @@ fun findObjectWithSpecificString(objectJson: JsonElement): MutableList<JsonEleme
             }
         }
     }
-    println(findObjectWithSpecificString.results)
     objectJson.accept(findObjectWithSpecificString)
-    println(findObjectWithSpecificString.results)
     val resultObjectList = findObjectWithSpecificString.resultsToPrint[0].second as JsonObject
     println("All object where is a String 'Peka' and their keys (Object | String) -> $resultObjectList")
     return findObjectWithSpecificString.results

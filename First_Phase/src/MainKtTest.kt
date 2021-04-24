@@ -1,4 +1,5 @@
 import kotlin.test.assertEquals
+import findJsonObjectWithSpecificString as findJsonObjectWithSpecificString
 
 internal class MainKtTest {
 
@@ -105,7 +106,7 @@ internal class MainKtTest {
                 "\t\t\"town\": \"Almada\",\n" +
                 "\t\t\"born\": \"Almada\"\n" +
                 "\t}\n" +
-                "}",passJsonObjectToTextual(jsonObject))
+                "}",passJsonElementToTextual(jsonObject))
     }
 
     @org.junit.jupiter.api.Test
@@ -163,7 +164,7 @@ internal class MainKtTest {
         jsonObject3.setProperty("town",jsonString6)
         jsonObject3.setProperty("born",jsonString6)
         jsonObject.setProperty("home",jsonObject3)
-        assertEquals(mutableListOf("Tiago","PASS","18","Peka","MirandaDoDouro","Almada"),findStrings(jsonObject))
+        assertEquals(mutableListOf("Tiago","PASS","18","Peka","MirandaDoDouro","Almada"),findAllStrings(jsonObject))
     }
 
     @org.junit.jupiter.api.Test
@@ -222,6 +223,6 @@ internal class MainKtTest {
         jsonObject3.setProperty("born",jsonString6)
         jsonObject.setProperty("home",jsonObject3)
         println(jsonObject1)
-        assertEquals(mutableListOf(jsonObject1),findObjectWithSpecificString(jsonObject)) //Não bate certo
+        assertEquals(mutableListOf(jsonObject1), findJsonObjectWithSpecificString(jsonObject,"Peka"))
     }
 }
