@@ -39,7 +39,6 @@ fun mapObject(o: KClassifier?, call: Any?): JsonElement {
     }
     return type
 }
-
 data class Student(
         val number: Int?,
         val name: String?,

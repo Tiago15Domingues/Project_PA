@@ -89,10 +89,10 @@ fun giveEndTextualToContinuosLineJsonElement(elementJSON: JsonElement,textualJSO
     val keyways = if (elementJSON is JsonObject){"}"}else{"]"}
     val parent = elementJSON.parent
     var jsonTextual = textualJSON
-    jsonTextual += if (parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1] != elementJSON || parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON) {
+    jsonTextual += if (depth != 1 && parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1] != elementJSON || parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON && depth != 1) {
         giveTabs(depth-1) + "$keyways,\n"
     } else {
-        if(parent == null){
+        if(parent == null || depth == 1){
             giveTabs(depth-1) + keyways
         }else {
             giveTabs(depth - 1) + "$keyways\n"
@@ -147,7 +147,6 @@ fun passJsonElementToTextual(objectJson: JsonElement): String {
         }
     }
     objectJson.accept(toTextual)
-
     return toTextual.jsonTextual
 }
 fun findAllStrings(objectJson: JsonElement): MutableList<String> {
@@ -159,7 +158,7 @@ fun findAllStrings(objectJson: JsonElement): MutableList<String> {
         }
     }
     objectJson.accept(findStrings)
-    println("All Strings -> " + findStrings.results)
+    println("All Strings -> " + findStrings.results) //Apenas para uma questão de prints e verificar se bate tudo certo
     return findStrings.results
 }
 fun findJsonObjectWithSpecificString(objectJson: JsonElement,string: String): MutableList<JsonElement> {
@@ -177,16 +176,16 @@ fun findJsonObjectWithSpecificString(objectJson: JsonElement,string: String): Mu
             if(s.value == string) {
                 if (!results.contains(obj)) {
                     results.add(obj)
-                    if (s.key != null) stringKey = s.key
-                    if (obj.key != null) objectKey = obj.key
-                    resultsToPrint.add(Pair("$objectKey | $stringKey", obj))
+                    if (s.key != null) stringKey = s.key //Apenas para uma questão de prints e verificar se bate tudo certo
+                    if (obj.key != null) objectKey = obj.key //Apenas para uma questão de prints e verificar se bate tudo certo
+                    resultsToPrint.add(Pair("$objectKey | $stringKey", obj)) //Apenas para uma questão de prints e verificar se bate tudo certo
                 }
             }
         }
     }
     objectJson.accept(findObjectWithSpecificString)
-    val resultObjectList = findObjectWithSpecificString.resultsToPrint[0].second as JsonObject
-    println("All object where is a String 'Peka' and their keys (Object | String) -> $resultObjectList")
+    val resultObjectList = findObjectWithSpecificString.resultsToPrint[0].second as JsonObject //Apenas para uma questão de prints e verificar se bate tudo certo
+    println("All object where is a String 'Peka' and their keys (Object | String) -> $resultObjectList") //Apenas para uma questão de prints e verificar se bate tudo certo
     return findObjectWithSpecificString.results
 }
 

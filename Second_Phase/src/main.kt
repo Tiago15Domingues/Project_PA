@@ -2,7 +2,7 @@ import kotlin.reflect.KClass
 import kotlin.reflect.full.declaredMemberProperties
 
 fun main(){
-    println(passJsonObjectToTextual(getJSON(studentMaleiro) as JsonObject))
+    println(passJsonElementToTextual(getJSON(studentMaleiro) as JsonObject))
     println(getJSONList(mutableListOf(studentMaleiro,studentAlfredo)))
 }
 fun getJSON(c:Any): JsonElement {

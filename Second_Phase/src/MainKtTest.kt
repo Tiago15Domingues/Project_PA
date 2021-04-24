@@ -22,7 +22,7 @@ internal class MainKtTest {
                 "\t\t\"name\": \"Zeca\",\n" +
                 "\t\t\"number\": 8000,\n" +
                 "\t\t\"repeting\": true,\n" +
-                "\t\t\"studentType\": null\n" +
+                "\t\t\"studentType\": \"Doctoral\"\n" +
                 "\t},\n" +
                 "\t\"bestGrades\": [\n" +
                 "\t\t{\n" +
@@ -38,7 +38,7 @@ internal class MainKtTest {
                 "\t\t\t\"name\": \"Zeca\",\n" +
                 "\t\t\t\"number\": 8000,\n" +
                 "\t\t\t\"repeting\": true,\n" +
-                "\t\t\t\"studentType\": null\n" +
+                "\t\t\t\"studentType\": \"Doctoral\"\n" +
                 "\t\t},\n" +
                 "\t\t{\n" +
                 "\t\t\t\"activities\": {\n" +
@@ -58,7 +58,7 @@ internal class MainKtTest {
                 "\t\t\t\t\"name\": \"Zeca\",\n" +
                 "\t\t\t\t\"number\": 8000,\n" +
                 "\t\t\t\t\"repeting\": true,\n" +
-                "\t\t\t\t\"studentType\": null\n" +
+                "\t\t\t\t\"studentType\": \"Doctoral\"\n" +
                 "\t\t\t},\n" +
                 "\t\t\t\"bestGrades\": [\n" +
                 "\t\t\t\t19,\n" +
@@ -67,18 +67,21 @@ internal class MainKtTest {
                 "\t\t\t\"name\": \"Alfredo\",\n" +
                 "\t\t\t\"number\": 83605,\n" +
                 "\t\t\t\"repeting\": false,\n" +
-                "\t\t\t\"studentType\": null\n" +
+                "\t\t\t\"studentType\": \"Bachelor\"\n" +
                 "\t\t}\n" +
                 "\t],\n" +
                 "\t\"name\": \"Maleiro\",\n" +
                 "\t\"number\": 83605,\n" +
                 "\t\"repeting\": false,\n" +
-                "\t\"studentType\": null\n" +
-                "}", passJsonObjectToTextual(getJSON(studentMaleiro) as JsonObject))
+                "\t\"studentType\": \"Master\"\n" +
+                "}", passJsonElementToTextual(getJSON(studentMaleiro) as JsonObject))
+        assertEquals(JsonObject()::class,(getJSON(studentMaleiro) as JsonObject)::class)
     }
 
     @org.junit.jupiter.api.Test
-    fun getJSONList() {
+    fun getJSONList() {                 //Verifico se o Textual do primeiro elemento da lista corresponde ao esperado, uma vez que tenho uma lista de JSONObjects
+                                        //e não conseguiria saber a instância exata dos jsonObjects retornados,
+                                        //mas consigo ter a certeza que as suas características (serialização para texto) são as mesmas.
         assertEquals("{\n" +
                 "\t\"activities\": {\n" +
                 "\t\t\"Indoor\": \"Chest\",\n" +
@@ -149,6 +152,7 @@ internal class MainKtTest {
                 "\t\"number\": 83605,\n" +
                 "\t\"repeting\": false,\n" +
                 "\t\"studentType\": \"Master\"\n" +
-                "}", passJsonObjectToTextual(getJSONList(mutableListOf(studentMaleiro,studentAlfredo))[0]))
+                "}", passJsonElementToTextual(getJSONList(mutableListOf(studentMaleiro, studentAlfredo))[0]))
+        assertEquals(mutableListOf(JsonObject())::class,(getJSONList(mutableListOf(studentMaleiro, studentAlfredo)))::class)
     }
 }
