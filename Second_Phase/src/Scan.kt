@@ -5,15 +5,15 @@ fun giveTabs(depth: Int): String {
     }
     return tab
 }
-
 fun giveTextualToEndLineJsonElement(elementJSON: JsonElement,textualJSON:String,depth: Int,textual:String): String {
     var jsonTextual = textualJSON
     val parent = elementJSON.parent
-    jsonTextual += if(parent is JsonObject)
-        textual
-    else
+    jsonTextual += if (elementJSON.key != null) {
+        giveTabs(depth) + "\"" + elementJSON.key + "\": " + textual
+    }else {
         giveTabs(depth) + textual
-    jsonTextual += if(parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1].second != elementJSON || parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON){
+    }
+    jsonTextual += if(parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1] != elementJSON || parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON){
         ",\n"
     }else {
         "\n"
@@ -24,121 +24,108 @@ fun giveEndTextualToContinuosLineJsonElement(elementJSON: JsonElement,textualJSO
     val keyways = if (elementJSON is JsonObject){"}"}else{"]"}
     val parent = elementJSON.parent
     var jsonTextual = textualJSON
-    jsonTextual += if (parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1].second != elementJSON || parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON) {
+    jsonTextual += if (parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1] != elementJSON || parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON) {
         giveTabs(depth-1) + "$keyways,\n"
     } else {
-        giveTabs(depth-1) + "$keyways\n"
+        if(parent == null){
+            giveTabs(depth-1) + "$keyways"
+        }else {
+            giveTabs(depth - 1) + "$keyways\n"
+        }
     }
     return jsonTextual
 }
 fun giveStartTextualToContinuosLineJsonElement(elementJSON: JsonElement,textualJSON:String,depth: Int): String {
     val keyways = if (elementJSON is JsonObject){"{"}else{"["}
     var jsonTextual = textualJSON
-    jsonTextual += if (elementJSON.parent is JsonArray){
-        giveTabs(depth) + "$keyways\n"
+    jsonTextual += if (elementJSON.key != null) {
+        giveTabs(depth) + "\"" + elementJSON.key + "\": " + "$keyways\n"
     }else{
-        "$keyways\n"
+        giveTabs(depth) + "$keyways\n"
     }
     return jsonTextual
 }
-
-fun passJsonObjectToTextual(objectJson: JsonObject): String {
+fun passJsonObjectToTextual(objectJson: JsonElement): String {
 
     val toTextual = object : Visitor {
         var jsonTextual = ""
         var depth = 0
-        override fun visit(o: JsonObject) {
+        override fun visit(o: JsonObject): Boolean {
             jsonTextual = giveStartTextualToContinuosLineJsonElement(o,jsonTextual,depth)
             depth++
-            o.jsonObjectContent.forEach {
-                jsonTextual += giveTabs(depth) + "\"" + it.first + "\": "
-                it.second.accept(this)
-            }
+            return true
+        }
+        override fun endvisitObject(o: JsonObject) {
             jsonTextual = giveEndTextualToContinuosLineJsonElement(o,jsonTextual,depth)
             depth--
         }
-
-        override fun visit(a: JsonArray) {
+        override fun visit(a: JsonArray): Boolean {
             jsonTextual = giveStartTextualToContinuosLineJsonElement(a,jsonTextual,depth)
             depth++
-            a.jsonArrayContent.forEach {
-                it.accept(this)
-            }
-            jsonTextual = giveEndTextualToContinuosLineJsonElement(a,jsonTextual,depth)
+            return true
+        }
+        override fun endvisitArray(o: JsonArray) {
+            jsonTextual = giveEndTextualToContinuosLineJsonElement(o,jsonTextual,depth)
             depth--
         }
-
         override fun visit(s: JsonString) {
             jsonTextual = giveTextualToEndLineJsonElement(s, jsonTextual,depth,"\"" + s.value +"\"")
         }
-
         override fun visit(b: JsonBoolean) {
             jsonTextual = giveTextualToEndLineJsonElement(b, jsonTextual,depth,b.value.toString())
         }
-
         override fun visit(n: JsonNull) {
             jsonTextual = giveTextualToEndLineJsonElement(n, jsonTextual,depth,n.value.toString())
         }
-
         override fun visit(i: JsonNumber) {
             jsonTextual = giveTextualToEndLineJsonElement(i, jsonTextual,depth,i.value.toString())
         }
     }
-    val findStrings = object : Visitor {
-        var results = mutableListOf<String>()
-        var newString = ""
-        override fun visit(o: JsonObject) {
-            o.jsonObjectContent.forEach {
-                newString = "\"" + it.first + "\": "
-                it.second.accept(this)
-            }
-        }
-
-        override fun visit(a: JsonArray) {
-            newString = ""
-            a.jsonArrayContent.forEach {
-                it.accept(this)
-            }
-        }
-
-        override fun visit(s: JsonString) {
-            results.add(newString + "\"" + s.value + "\"")
-        }
-    }
-    val findObjectWithSpecificString = object : Visitor {
-        var results = mutableListOf<Pair<String,JsonObject>>()
-        var obj = JsonObject()
-        var objectKey = ""
-        var stringKey = ""
-        override fun visit(o: JsonObject) {
-            obj = o
-            o.jsonObjectContent.forEach {
-                if (it.second is JsonObject)
-                    objectKey = it.first
-                stringKey = it.first
-                it.second.accept(this)
-            }
-        }
-
-        override fun visit(a: JsonArray) {
-            a.jsonArrayContent.forEach {
-                it.accept(this)
-            }
-        }
-
-        override fun visit(s: JsonString) {
-            if(s.value == "Peka")
-                results.add(Pair("$objectKey | $stringKey",obj))
-        }
-    }
-
     objectJson.accept(toTextual)
-    objectJson.accept(findStrings)
-    objectJson.accept(findObjectWithSpecificString)
-
-    println("All object Strings and their keys -> " + findStrings.results)
-    println("All object where is a String 'Peka' and their keys (Object | String) -> " + findObjectWithSpecificString.results/*[0].jsonObjectContent*/)
 
     return toTextual.jsonTextual
 }
-
+fun findStrings(objectJson: JsonElement): MutableList<String> {
+    val findStrings = object : Visitor {
+        var results = mutableListOf<String>()
+        override fun visit(s: JsonString) {
+            if (!results.contains(s.value))
+                results.add(s.value)
+        }
+    }
+    objectJson.accept(findStrings)
+    println("All Strings -> " + findStrings.results)
+    return findStrings.results
+}
+fun findObjectWithSpecificString(objectJson: JsonElement): MutableList<JsonElement> {
+    val findObjectWithSpecificString = object : Visitor {
+        var resultsToPrint = mutableListOf<Pair<String,JsonElement>>()
+        var results = mutableListOf<JsonElement>()
+        var obj = objectJson
+        var objectKey : String? = ""
+        var stringKey : String? = ""
+        override fun visit(o: JsonObject): Boolean {
+            obj = o
+            return true
+        }
+        override fun visit(s: JsonString) {
+            println(obj)
+            if(s.value == "Peka") {
+                if (!results.contains(obj)) {
+                    println(results)
+                    results.add(obj)
+                    println(results)
+                    if (s.key != null) stringKey = s.key
+                    if (obj.key != null) objectKey = obj.key
+                    resultsToPrint.add(Pair("$objectKey | $stringKey", obj))
+                }
+            }
+        }
+    }
+    println(findObjectWithSpecificString.results)
+    objectJson.accept(findObjectWithSpecificString)
+    println(findObjectWithSpecificString.results)
+    val resultObjectList = findObjectWithSpecificString.resultsToPrint[0].second as JsonObject
+    println("All object where is a String 'Peka' and their keys (Object | String) -> $resultObjectList")
+    return findObjectWithSpecificString.results
+}

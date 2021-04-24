@@ -8,12 +8,12 @@ fun main(){
     println(value.toString().replace("[", "").replace("]", ""))
     //println(t1 is )
     val jsonObject = JsonObject()
-    val jsonNumber1 = JsonNumber(123123)
-    jsonObject.setProperty("id",jsonNumber1)
-    jsonObject.setProperty("id",jsonNumber1)
-    println(jsonObject.jsonElementContent)
-    val jsonObject1 = jsonObject::class
-    println(jsonObject1.objectInstance?.jsonElementContent)
+    val jsonObject1 = JsonObject()
+    var s = jsonObject
+    s = jsonObject1
+    println(jsonObject)
+    println(s)
+    println(jsonObject1)
 
 }
 class JsonObject{

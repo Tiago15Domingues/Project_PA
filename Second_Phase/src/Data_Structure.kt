@@ -2,8 +2,10 @@ import javax.lang.model.type.NullType
 
 interface Visitor {
     fun visit(s: JsonString) {}
-    fun visit(o: JsonObject) {}
-    fun visit(a: JsonArray) {}
+    fun visit(o: JsonObject) : Boolean = true
+    fun endvisitObject(o: JsonObject) {}
+    fun visit(a: JsonArray) : Boolean = true
+    fun endvisitArray(o: JsonArray) {}
     fun visit(b: JsonBoolean) {}
     fun visit(n: JsonNull) {}
     fun visit(i: JsonNumber) {}
@@ -11,11 +13,12 @@ interface Visitor {
 
 abstract class JsonElement {
     var parent: JsonElement? = null
+    var key: String? = null
     abstract fun accept(v: Visitor)
 }
 
 class JsonObject : JsonElement() { //{ "name":"John", "age":30, "car":null }
-    var jsonObjectContent = mutableListOf<Pair<String,JsonElement>>()
+    var jsonObjectContent = mutableListOf<JsonElement>()
 
     fun setProperty(key: String, jsonElement: JsonElement) {
         var newjsonElement: JsonElement? = null
@@ -34,11 +37,17 @@ class JsonObject : JsonElement() { //{ "name":"John", "age":30, "car":null }
             is JsonNull -> newjsonElement = JsonNull(jsonElement.value)
         }
         newjsonElement!!.parent = this
-        this.jsonObjectContent.add(Pair(key,newjsonElement))
+        newjsonElement.key = key
+        this.jsonObjectContent.add(newjsonElement)
     }
 
     override fun accept(v: Visitor) {
-        v.visit(this)
+        if(v.visit(this)){
+            jsonObjectContent.forEach {
+                it.accept(v)
+            }
+            v.endvisitObject(this)
+        }
     }
 }
 
@@ -66,7 +75,12 @@ class JsonArray(val value: Array<JsonElement>): JsonElement() { //{a, b, c}
     }
 
     override fun accept(v: Visitor) {
-        v.visit(this)
+        if (v.visit(this)) {
+            jsonArrayContent.forEach {
+                it.accept(v)
+            }
+            v.endvisitArray(this)
+        }
     }
 }
 
