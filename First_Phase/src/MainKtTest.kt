@@ -164,7 +164,7 @@ internal class MainKtTest {
         jsonObject3.setProperty("town",jsonString6)
         jsonObject3.setProperty("born",jsonString6)
         jsonObject.setProperty("home",jsonObject3)
-        assertEquals(mutableListOf("Tiago","PASS","18","Peka","MirandaDoDouro","Almada"),findAllStrings(jsonObject)) //Retorno todas as strings (não repetindo) presentes num JSONObject
+        assertEquals(mutableListOf("Tiago","PASS","18","Peka","MirandaDoDouro","Almada"),findAllStrings(jsonObject)) //Retorna todas as strings (não repetindo) presentes num JSONObject
     }
 
     @org.junit.jupiter.api.Test
@@ -222,8 +222,8 @@ internal class MainKtTest {
         jsonObject3.setProperty("town",jsonString6)
         jsonObject3.setProperty("born",jsonString6)
         jsonObject.setProperty("home",jsonObject3)
-        assertEquals("\"pet\": {\n" + //Verifico se o Textual do primeiro elemento da lista corresponde ao esperado desta forma uma vez que tenho uma lista de JSONObjects
-                "\t\"animalID\": 123123,\n" + //e não conseguiria saber a instância exata dos jsonObjects retornados (devido à forma como tenho setProperty(), onde faço com que JSONElement
+        assertEquals("\"pet\": {\n" + //Verifico, desta forma, se o Textual do primeiro elemento da lista corresponde ao esperado uma vez que tenho uma lista de JSONObjects
+                "\t\"animalID\": 123123,\n" + //e não conseguiria saber a instâncias exatas dos jsonObjects retornados (devido à forma como tenho setProperty(), onde faço com que JSONElement
                 "\t\"name\": \"Peka\",\n" +   //tenha sempre o pai correto associado, mesmo sendo utilizado a diferentes profundidades),
                 "\t\"petHome\": {\n" +        //mas consigo ter a certeza que as suas características são as mesmas
                 "\t\t\"town\": \"MirandaDoDouro\",\n" +

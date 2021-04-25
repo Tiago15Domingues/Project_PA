@@ -4,24 +4,24 @@ internal class MainKtTest {
 
     @org.junit.jupiter.api.Test
     fun getJSON() {
-        var jsonObject = JsonObject()
-        var jsonObject1 = JsonObject()
-        var jsonStringChest = JsonString("Chest")
-        var jsonStringFootball = JsonString("Football")
-        var jsonStringDarts= JsonString("Darts")
-        var jsonStringCrossCountry = JsonString("Cross Country")
-        var jsonNull = JsonNull(null)
+        val jsonObject = JsonObject()
+        val jsonObject1 = JsonObject()
+        val jsonStringChest = JsonString("Chest")
+        val jsonStringFootball = JsonString("Football")
+        val jsonStringDarts= JsonString("Darts")
+        val jsonStringCrossCountry = JsonString("Cross Country")
+        val jsonNull = JsonNull(null)
         jsonObject1.setProperty("Indoor",jsonStringChest)
         jsonObject1.setProperty("Outside",jsonStringFootball)
         jsonObject.setProperty("activities",jsonObject1)
 
-        var jsonObject2 = JsonObject()
-        var jsonObject3 = JsonObject()
+        val jsonObject2 = JsonObject()
+        val jsonObject3 = JsonObject()
         jsonObject3.setProperty("Indoor",jsonStringDarts)
         jsonObject3.setProperty("Outside",jsonStringCrossCountry)
         jsonObject2.setProperty("activities",jsonObject3)
         jsonObject2.setProperty("bestFriend",jsonNull)
-        var jsonArray = JsonArray(arrayOf(JsonNumber(12),JsonNumber(14)))
+        val jsonArray = JsonArray(arrayOf(JsonNumber(12),JsonNumber(14)))
         jsonObject2.setProperty("bestGrades",jsonArray)
         jsonObject2.setProperty("name",JsonString("Zeca"))
         jsonObject2.setProperty("number",JsonNumber(8000))
@@ -29,24 +29,24 @@ internal class MainKtTest {
         jsonObject2.setProperty("studentType",JsonString("Doctoral"))
         jsonObject.setProperty("bestFriend",jsonObject2)
 
-        var jsonObject7 = JsonObject()
+        val jsonObject7 = JsonObject()
         jsonObject7.setProperty("activities",jsonObject1)
         jsonObject7.setProperty("bestFriend",jsonObject2)
-        var jsonArray4 = JsonArray(arrayOf(JsonNumber(19),JsonNumber(18)))
+        val jsonArray4 = JsonArray(arrayOf(JsonNumber(19),JsonNumber(18)))
         jsonObject7.setProperty("bestGrades",jsonArray4)
         jsonObject7.setProperty("name",JsonString("Alfredo"))
         jsonObject7.setProperty("number",JsonNumber(83605))
         jsonObject7.setProperty("repeting",JsonBoolean(false))
         jsonObject7.setProperty("studentType",JsonString("Bachelor"))
 
-        var jsonArray1 = JsonArray(arrayOf(jsonObject2,jsonObject7))
+        val jsonArray1 = JsonArray(arrayOf(jsonObject2,jsonObject7))
         jsonObject.setProperty("bestGrades",jsonArray1)
         jsonObject.setProperty("name",JsonString("Maleiro"))
         jsonObject.setProperty("number",JsonNumber(83605))
         jsonObject.setProperty("repeting",JsonBoolean(false))
         jsonObject.setProperty("studentType",JsonString("Master"))
-
         assertEquals(passJsonElementToTextual(jsonObject),passJsonElementToTextual(getJSON(studentMaleiro) as JsonObject)) //Verificar se retorna o objeto correto defenindo esse mesmo objeto
+
         assertEquals("{\n" + //Verificar se retorna a serialização em JSON da dataClass
                 "\t\"activities\": {\n" +
                 "\t\t\"Indoor\": \"Chest\",\n" +
