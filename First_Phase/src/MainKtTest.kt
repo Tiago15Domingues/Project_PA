@@ -113,7 +113,7 @@ internal class MainKtTest {
     fun findStrings() {
         val jsonObject = JsonObject()
         val jsonNumber1 = JsonNumber(123123)
-        val jsonString1 = JsonString("Tiago")
+        val jsonString1 = JsonString("Tiago") // <- String
         val jsonNull1 = JsonNull(null)
         val jsonBool1 = JsonBoolean(true)
 
@@ -124,7 +124,7 @@ internal class MainKtTest {
 
         val jsonObject4 = JsonObject()
         val jsonNumber2 = JsonNumber(10)
-        val jsonString2 = JsonString("18")
+        val jsonString2 = JsonString("18") // <- String
         jsonObject4.setProperty("PA",jsonNumber2)
         jsonObject4.setProperty("IAA",jsonString2)
 
@@ -141,18 +141,18 @@ internal class MainKtTest {
 
         val jsonBool2 = JsonBoolean(true)
         val jsonNull2 = JsonNull(null)
-        val jsonString3 = JsonString("PASS")
+        val jsonString3 = JsonString("PASS") // <- String
         val jsonArray1 = JsonArray(arrayOf(jsonObject5,jsonNull2))
         val jsonArray2 = JsonArray(arrayOf(jsonString3,jsonObject6,jsonArray1,jsonBool2,jsonObject4))
         jsonObject.setProperty("grades", jsonArray2)
 
         val jsonObject12 = JsonObject()
-        val jsonString4 = JsonString("MirandaDoDouro")
+        val jsonString4 = JsonString("MirandaDoDouro") // <- String
         jsonObject12.setProperty("town",jsonString4)
         jsonObject12.setProperty("born",jsonString4)
 
         val jsonObject1 = JsonObject()
-        val jsonString5 = JsonString("Peka")
+        val jsonString5 = JsonString("Peka") // <- String
         jsonObject1.setProperty("animalID",jsonNumber1)
         jsonObject1.setProperty("name",jsonString5)
         jsonObject1.setProperty("petHome",jsonObject12)
@@ -160,7 +160,7 @@ internal class MainKtTest {
         jsonObject.setProperty("pet",jsonObject1)
 
         val jsonObject3 = JsonObject()
-        val jsonString6 = JsonString("Almada")
+        val jsonString6 = JsonString("Almada") // <- String
         jsonObject3.setProperty("town",jsonString6)
         jsonObject3.setProperty("born",jsonString6)
         jsonObject.setProperty("home",jsonObject3)
@@ -209,26 +209,27 @@ internal class MainKtTest {
         jsonObject12.setProperty("town",jsonString4)
         jsonObject12.setProperty("born",jsonString4)
 
-        val jsonObject1 = JsonObject()
-        val jsonString5 = JsonString("Peka")
-        jsonObject1.setProperty("animalID",jsonNumber1)
-        jsonObject1.setProperty("name",jsonString5)
-        jsonObject1.setProperty("petHome",jsonObject12)
+        val jsonObject1 = JsonObject() //<- Objeto em questão
+        val jsonString5 = JsonString("Peka") //<- Contrução do Objeto em questão
+        jsonObject1.setProperty("animalID",jsonNumber1) //<- Contrução do Objeto em questão
+        jsonObject1.setProperty("name",jsonString5) //<- Contrução do Objeto em questão
+        jsonObject1.setProperty("petHome",jsonObject12) //<- Contrução do Objeto em questão
 
-        jsonObject.setProperty("pet",jsonObject1)
+        jsonObject.setProperty("pet",jsonObject1) //<- Defenição da key do objeto em questão
 
         val jsonObject3 = JsonObject()
         val jsonString6 = JsonString("Almada")
         jsonObject3.setProperty("town",jsonString6)
         jsonObject3.setProperty("born",jsonString6)
         jsonObject.setProperty("home",jsonObject3)
-        assertEquals("\"pet\": {\n" + //Verifico se o Textual do primeiro elemento da lista corresponde ao esperado, uma vez que tenho uma lista de JSONObjects
+        assertEquals("\"pet\": {\n" + //Verifico se o Textual do primeiro elemento da lista corresponde ao esperado desta forma uma vez que tenho uma lista de JSONObjects
                 "\t\"animalID\": 123123,\n" + //e não conseguiria saber a instância exata dos jsonObjects retornados (devido à forma como tenho setProperty(), onde faço com que JSONElement
                 "\t\"name\": \"Peka\",\n" +   //tenha sempre o pai correto associado, mesmo sendo utilizado a diferentes profundidades),
-                "\t\"petHome\": {\n" +        //mas consigo ter a certeza que as suas características são as mesmas.
+                "\t\"petHome\": {\n" +        //mas consigo ter a certeza que as suas características são as mesmas
                 "\t\t\"town\": \"MirandaDoDouro\",\n" +
                 "\t\t\"born\": \"MirandaDoDouro\"\n" +
                 "\t}\n" +
                 "}", passJsonElementToTextual(findJsonObjectWithSpecificString(jsonObject,"Peka")[0]))
+        println(passJsonElementToTextual(findJsonObjectWithSpecificString(jsonObject,"Peka")[0]))
     }
 }

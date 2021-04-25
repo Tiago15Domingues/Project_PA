@@ -103,7 +103,7 @@ fun giveEndTextualToContinuosLineJsonElement(elementJSON: JsonElement,textualJSO
 fun giveStartTextualToContinuosLineJsonElement(elementJSON: JsonElement,textualJSON:String,depth: Int): String {
     val keyways = if (elementJSON is JsonObject){"{"}else{"["}
     var jsonTextual = textualJSON
-    jsonTextual += if (elementJSON.key != null) {
+    jsonTextual += if (elementJSON.key != null ) {
         giveTabs(depth) + "\"" + elementJSON.key + "\": " + "$keyways\n"
     }else{
         giveTabs(depth) + "$keyways\n"

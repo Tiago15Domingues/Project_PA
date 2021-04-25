@@ -4,7 +4,50 @@ internal class MainKtTest {
 
     @org.junit.jupiter.api.Test
     fun getJSON() {
-        assertEquals("{\n" +
+        var jsonObject = JsonObject()
+        var jsonObject1 = JsonObject()
+        var jsonStringChest = JsonString("Chest")
+        var jsonStringFootball = JsonString("Football")
+        var jsonStringDarts= JsonString("Darts")
+        var jsonStringCrossCountry = JsonString("Cross Country")
+        var jsonNull = JsonNull(null)
+        jsonObject1.setProperty("Indoor",jsonStringChest)
+        jsonObject1.setProperty("Outside",jsonStringFootball)
+        jsonObject.setProperty("activities",jsonObject1)
+
+        var jsonObject2 = JsonObject()
+        var jsonObject3 = JsonObject()
+        jsonObject3.setProperty("Indoor",jsonStringDarts)
+        jsonObject3.setProperty("Outside",jsonStringCrossCountry)
+        jsonObject2.setProperty("activities",jsonObject3)
+        jsonObject2.setProperty("bestFriend",jsonNull)
+        var jsonArray = JsonArray(arrayOf(JsonNumber(12),JsonNumber(14)))
+        jsonObject2.setProperty("bestGrades",jsonArray)
+        jsonObject2.setProperty("name",JsonString("Zeca"))
+        jsonObject2.setProperty("number",JsonNumber(8000))
+        jsonObject2.setProperty("repeting",JsonBoolean(true))
+        jsonObject2.setProperty("studentType",JsonString("Doctoral"))
+        jsonObject.setProperty("bestFriend",jsonObject2)
+
+        var jsonObject7 = JsonObject()
+        jsonObject7.setProperty("activities",jsonObject1)
+        jsonObject7.setProperty("bestFriend",jsonObject2)
+        var jsonArray4 = JsonArray(arrayOf(JsonNumber(19),JsonNumber(18)))
+        jsonObject7.setProperty("bestGrades",jsonArray4)
+        jsonObject7.setProperty("name",JsonString("Alfredo"))
+        jsonObject7.setProperty("number",JsonNumber(83605))
+        jsonObject7.setProperty("repeting",JsonBoolean(false))
+        jsonObject7.setProperty("studentType",JsonString("Bachelor"))
+
+        var jsonArray1 = JsonArray(arrayOf(jsonObject2,jsonObject7))
+        jsonObject.setProperty("bestGrades",jsonArray1)
+        jsonObject.setProperty("name",JsonString("Maleiro"))
+        jsonObject.setProperty("number",JsonNumber(83605))
+        jsonObject.setProperty("repeting",JsonBoolean(false))
+        jsonObject.setProperty("studentType",JsonString("Master"))
+
+        assertEquals(passJsonElementToTextual(jsonObject),passJsonElementToTextual(getJSON(studentMaleiro) as JsonObject)) //Verificar se retorna o objeto correto defenindo esse mesmo objeto
+        assertEquals("{\n" + //Verificar se retorna a serialização em JSON da dataClass
                 "\t\"activities\": {\n" +
                 "\t\t\"Indoor\": \"Chest\",\n" +
                 "\t\t\"Outside\": \"Football\"\n" +
@@ -75,14 +118,8 @@ internal class MainKtTest {
                 "\t\"repeting\": false,\n" +
                 "\t\"studentType\": \"Master\"\n" +
                 "}", passJsonElementToTextual(getJSON(studentMaleiro) as JsonObject))
-        assertEquals(JsonObject()::class,(getJSON(studentMaleiro) as JsonObject)::class)
-    }
-
-    @org.junit.jupiter.api.Test
-    fun getJSONList() {                 //Verifico se o Textual do primeiro elemento da lista corresponde ao esperado, uma vez que tenho uma lista de JSONObjects
-                                        //e não conseguiria saber a instância exata dos jsonObjects retornados,
-                                        //mas consigo ter a certeza que as suas características (serialização para texto) são as mesmas.
-        assertEquals("{\n" +
+        assertEquals(JsonObject()::class,(getJSON(studentMaleiro) as JsonObject)::class) //Verificar se retorna um JSONObject
+        assertEquals("{\n" +  ////Verificar se retorna a serialização em JSON da primeira dataClass da lista
                 "\t\"activities\": {\n" +
                 "\t\t\"Indoor\": \"Chest\",\n" +
                 "\t\t\"Outside\": \"Football\"\n" +
@@ -152,7 +189,6 @@ internal class MainKtTest {
                 "\t\"number\": 83605,\n" +
                 "\t\"repeting\": false,\n" +
                 "\t\"studentType\": \"Master\"\n" +
-                "}", passJsonElementToTextual((getJSON(mutableListOf(studentMaleiro, studentAlfredo))as MutableList<JsonElement>)[0]))
-        assertEquals(mutableListOf(JsonObject())::class,(getJSON(mutableListOf(studentMaleiro, studentAlfredo)))::class)
+                "}",passJsonElementToTextual((getJSON(mutableListOf(studentMaleiro,studentAlfredo)) as MutableList<JsonElement>)[0]))
     }
 }
