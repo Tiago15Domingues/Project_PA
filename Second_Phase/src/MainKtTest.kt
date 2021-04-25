@@ -46,7 +46,6 @@ internal class MainKtTest {
         jsonObject.setProperty("repeting",JsonBoolean(false))
         jsonObject.setProperty("studentType",JsonString("Master"))
         assertEquals(passJsonElementToTextual(jsonObject),passJsonElementToTextual(getJSON(studentMaleiro) as JsonObject)) //Verificar se retorna o objeto correto defenindo esse mesmo objeto
-
         assertEquals("{\n" + //Verificar se retorna a serialização em JSON da dataClass
                 "\t\"activities\": {\n" +
                 "\t\t\"Indoor\": \"Chest\",\n" +
@@ -189,6 +188,6 @@ internal class MainKtTest {
                 "\t\"number\": 83605,\n" +
                 "\t\"repeting\": false,\n" +
                 "\t\"studentType\": \"Master\"\n" +
-                "}",passJsonElementToTextual((getJSON(mutableListOf(studentMaleiro,studentAlfredo)) as MutableList<JsonElement>)[0]))
+                "}",passJsonElementToTextual((getJSON(mutableListOf(studentMaleiro,studentAlfredo)) as JsonArray).value[0]))
     }
 }

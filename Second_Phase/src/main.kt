@@ -7,11 +7,11 @@ fun main(){
 }
 fun getJSON(c:Any): Any {
     return if (c is MutableList<*>){
-        val jsonObjectList = mutableListOf<JsonElement>()
+        val jsonArray = mutableListOf<JsonElement>()
         c.forEach { it1->
-            jsonObjectList.add(getJSON(it1!!) as JsonElement)
+            jsonArray.add(getJSON(it1!!) as JsonElement)
         }
-        jsonObjectList
+        JsonArray(jsonArray.toTypedArray())
     }else{
         if (c::class.isData) {
             val clazz: KClass<Any> = c::class as KClass<Any>

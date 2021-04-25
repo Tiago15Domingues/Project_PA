@@ -230,6 +230,5 @@ internal class MainKtTest {
                 "\t\t\"born\": \"MirandaDoDouro\"\n" +
                 "\t}\n" +
                 "}", passJsonElementToTextual(findJsonObjectWithSpecificString(jsonObject,"Peka")[0]))
-        println(passJsonElementToTextual(findJsonObjectWithSpecificString(jsonObject,"Peka")[0]))
     }
 }
