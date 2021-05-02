@@ -84,6 +84,7 @@ fun passJsonElementToTextual(objectJson: JsonElement): String {
     objectJson.accept(toTextual)
     return toTextual.jsonTextual
 }
+
 fun findAllStrings(objectJson: JsonElement): MutableList<String> {
     val findStrings = object : Visitor {
         var results = mutableListOf<String>()
@@ -123,3 +124,5 @@ fun findJsonObjectWithSpecificString(objectJson: JsonElement,string: String): Mu
     println("All object where is a String 'Peka' and their keys (Object | String) -> $resultObjectList") //Apenas para uma questão de prints e verificar se bate tudo certo
     return findObjectWithSpecificString.results
 }
+
+
