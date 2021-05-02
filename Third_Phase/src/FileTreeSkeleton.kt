@@ -101,7 +101,7 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
     }
 
     private fun setTreeElements(jsonObject: JsonObject){
-        var parents = mutableListOf<TreeItem>()
+        val parents = mutableListOf<TreeItem>()
         var depth = -1
         val toTree = object : Visitor {
             override fun visit(o: JsonObject): Boolean {

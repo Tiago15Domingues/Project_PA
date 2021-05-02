@@ -5,7 +5,7 @@ interface Visitor {
     fun visit(o: JsonObject) : Boolean = true
     fun endvisitObject(o: JsonObject) {}
     fun visit(a: JsonArray) : Boolean = true
-    fun endvisitArray(o: JsonArray) {}
+    fun endvisitArray(a: JsonArray) {}
     fun visit(b: JsonBoolean) {}
     fun visit(n: JsonNull) {}
     fun visit(i: JsonNumber) {}
