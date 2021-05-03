@@ -1,6 +1,9 @@
 import org.eclipse.swt.SWT
+import org.eclipse.swt.events.ModifyEvent
+import org.eclipse.swt.events.ModifyListener
 import org.eclipse.swt.events.SelectionAdapter
 import org.eclipse.swt.events.SelectionEvent
+import org.eclipse.swt.graphics.Color
 import org.eclipse.swt.layout.GridData
 import org.eclipse.swt.layout.GridLayout
 import org.eclipse.swt.widgets.*
@@ -82,8 +85,8 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
 
         setTreeElements(jsonObject)
 
-        val comp = Composite(shell, SWT.BORDER)
-        content = Label(comp,SWT.BORDER)
+        //val comp = Composite(shell, SWT.BORDER)
+        content = Label(shell,SWT.BORDER)
         tree.addSelectionListener(object : SelectionAdapter() {
             override fun widgetSelected(e: SelectionEvent) {
                 content.text = tree.selection.first().data.toString()
@@ -93,17 +96,17 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
             }
         })
 
-        val label = Label(shell, SWT.NONE)
-        label.text = "skeleton"
-
-        val button = Button(shell, SWT.PUSH)
-        button.text = "depth"
-        button.addSelectionListener(object: SelectionAdapter() {
-            override fun widgetSelected(e: SelectionEvent) {
-                val item = tree.selection.first()
-                label.text = item.depth().toString()
+        val label = Text(shell, SWT.BORDER)
+        label.layoutData = GridData(SWT.FILL, SWT.CENTER, false, false)
+        label.toolTipText = "Search in the Tree"
+        label.addModifyListener {
+            tree.traverse {
+                if (it.text.contains(label.text) && label.text != "")
+                    it.background = Color(233,233,143)
+                else
+                    it.background = Color(255,255,255)
             }
-        })
+        }
     }
 
     private fun setTreeElements(jsonObject: JsonObject){
@@ -195,12 +198,6 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
         jsonObject.accept(toTree)
     }
 
-    // auxiliar para profundidade do nó
-    fun TreeItem.depth(): Int =
-        if(parentItem == null) 0
-        else 1 + parentItem.depth()
-
-
     fun open() {
         tree.expandAll()
         shell.pack()
@@ -213,9 +210,6 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
     }
 }
 
-
-// auxiliares para varrer a árvore
-
 fun Tree.expandAll() = traverse { it.expanded = true }
 
 fun Tree.traverse(visitor: (TreeItem) -> Unit) {
@@ -225,7 +219,9 @@ fun Tree.traverse(visitor: (TreeItem) -> Unit) {
             it.traverse()
         }
     }
-    items.forEach { it.traverse() }
+    items.forEach {
+        it.traverse()
+    }
 }
 
 
