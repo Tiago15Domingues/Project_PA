@@ -56,12 +56,14 @@ fun main(){
     val jsonObject2 = JsonObject()
     jsonObject2.setProperty("MEI_Student",jsonObject)
 
-    findAllStrings(jsonObject)
+/*    findAllStrings(jsonObject)
     findJsonObjectWithSpecificString(jsonObject,"Peka")
     print(passJsonElementToTextual(jsonObject) + "\n")
     findAllStrings(jsonObject2)
     findJsonObjectWithSpecificString(jsonObject2,"Peka")
-    println(passJsonElementToTextual(jsonObject2))
+    println(passJsonElementToTextual(jsonObject2))    */
+    println(passJsonElementToTextual(jsonObject1))
+
 }
 fun giveTabs(depth: Int): String {
     var tab = ""
@@ -78,10 +80,13 @@ fun giveTextualToEndLineJsonElement(elementJSON: JsonElement,textualJSON:String,
     }else {
         giveTabs(depth) + textual
     }
-    jsonTextual += if(parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1] != elementJSON || parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON){
+    jsonTextual += if(depth != 0 && (parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1] != elementJSON || parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON)){
         ",\n"
     }else {
-        "\n"
+        if(depth != 0)
+            "\n"
+        else
+            ""
     }
     return jsonTextual
 }

@@ -13,10 +13,13 @@ fun giveTextualToEndLineJsonElement(elementJSON: JsonElement,textualJSON:String,
     }else {
         giveTabs(depth) + textual
     }
-    jsonTextual += if(parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1] != elementJSON || parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON){
+    jsonTextual += if(depth != 0 && (parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1] != elementJSON || parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON)){
         ",\n"
     }else {
-        "\n"
+        if(depth != 0)
+            "\n"
+        else
+            ""
     }
     return jsonTextual
 }

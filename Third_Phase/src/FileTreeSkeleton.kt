@@ -1,6 +1,7 @@
 import org.eclipse.swt.SWT
 import org.eclipse.swt.events.SelectionAdapter
 import org.eclipse.swt.events.SelectionEvent
+import org.eclipse.swt.layout.GridData
 import org.eclipse.swt.layout.GridLayout
 import org.eclipse.swt.widgets.*
 
@@ -65,25 +66,30 @@ fun main() {
     FileTreeSkeleton(jsonObject2).open()
 }
 
-data class JSONElementDummy(val number: Int)
-
 class FileTreeSkeleton(jsonObject: JsonObject) {
     val shell: Shell
     val tree: Tree
+    val content: Label
 
     init {
         shell = Shell(Display.getDefault())
-        shell.setSize(250, 200)
+        shell.setSize(450, 500)
+        shell.setLocation(1200,100)
         shell.text = "JSON skeleton"
-        shell.layout = GridLayout(1,false)
+        shell.layout = GridLayout(2,false)
 
-        tree = Tree(shell, SWT.SINGLE or SWT.BORDER)
+        tree = Tree(shell, SWT.SINGLE or SWT.BORDER or SWT.V_SCROLL)
 
         setTreeElements(jsonObject)
 
+        val comp = Composite(shell, SWT.BORDER)
+        content = Label(comp,SWT.BORDER)
         tree.addSelectionListener(object : SelectionAdapter() {
             override fun widgetSelected(e: SelectionEvent) {
-                println("selected: " + tree.selection.first().data)
+                content.text = tree.selection.first().data.toString()
+                content.pack()
+                shell.layout(true)
+                shell.pack()
             }
         })
 
@@ -115,7 +121,7 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
                 }else {
                     jo.text = o.toString()
                 }
-                jo.data = JSONElementDummy(1)
+                jo.data = passJsonElementToTextual(o)
                 parents.add(jo)
                 depth++
                 return true
@@ -137,7 +143,7 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
                 }else {
                     ja.text = a.toString()
                 }
-                ja.data = JSONElementDummy(1)
+                ja.data = passJsonElementToTextual(a)
                 parents.add(ja)
                 depth++
                 return true
@@ -155,7 +161,7 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
                 }else {
                     js.text = "\"" + s.value + "\""
                 }
-                js.data = JSONElementDummy(1)
+                js.data = passJsonElementToTextual(s)
             }
 
             override fun visit(b: JsonBoolean) {
@@ -165,7 +171,7 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
                 }else {
                     jb.text = b.value.toString()
                 }
-                jb.data = JSONElementDummy(1)
+                jb.data = passJsonElementToTextual(b)
             }
             override fun visit(n: JsonNull) {
                 val jn = TreeItem(parents[depth], SWT.NONE)
@@ -174,7 +180,7 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
                 }else {
                     jn.text = n.value.toString()
                 }
-                jn.data = JSONElementDummy(1)
+                jn.data = passJsonElementToTextual(n)
             }
             override fun visit(i: JsonNumber) {
                 val ji = TreeItem(parents[depth], SWT.NONE)
@@ -183,7 +189,7 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
                 }else {
                     ji.text = i.value.toString()
                 }
-                ji.data = JSONElementDummy(1)
+                ji.data = passJsonElementToTextual(i)
             }
         }
         jsonObject.accept(toTree)
