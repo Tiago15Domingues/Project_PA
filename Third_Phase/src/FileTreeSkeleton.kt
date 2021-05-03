@@ -101,6 +101,7 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
         label.toolTipText = "Search in the Tree"
         label.addModifyListener {
             tree.traverse {
+                it.checked = true
                 if (it.text.contains(label.text) && label.text != "")
                     it.background = Color(233,233,143)
                 else
