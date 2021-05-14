@@ -3,7 +3,7 @@ import javax.lang.model.type.NullType
 
 fun main(){
 
-    var value = mutableListOf<Any>()
+/*    var value = mutableListOf<Any>()
     value.add(13)
     println(value.toString().replace("[", "").replace("]", ""))
     //println(t1 is )
@@ -13,7 +13,9 @@ fun main(){
     s = jsonObject1
     println(jsonObject)
     println(s)
-    println(jsonObject1)
+    println(jsonObject1)*/
+    var t = "TRuE"
+    println(t.toBoolean())
 
 }
 class JsonObject{

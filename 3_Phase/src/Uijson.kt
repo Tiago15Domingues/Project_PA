@@ -1,6 +1,4 @@
 import org.eclipse.swt.SWT
-import org.eclipse.swt.events.ModifyEvent
-import org.eclipse.swt.events.ModifyListener
 import org.eclipse.swt.events.SelectionAdapter
 import org.eclipse.swt.events.SelectionEvent
 import org.eclipse.swt.graphics.Color
@@ -66,16 +64,16 @@ fun main() {
     val jsonObject2 = JsonObject()
     jsonObject2.setProperty("MEI_Student",jsonObject)
     println(passJsonElementToTextual((jsonObject2)))
-    FileTreeSkeleton(jsonObject2).open()
+    Uijson().openJsonUI(jsonObject2)
 }
 
-class FileTreeSkeleton(jsonObject: JsonObject) {
+class Uijson() {
     val shell: Shell
     val tree: Tree
     val content: Label
 
     init {
-        shell = Shell(Display.getDefault())
+        shell = Shell(Display.getDefault(),)
         shell.setSize(450, 500)
         shell.setLocation(1200,100)
         shell.text = "JSON skeleton"
@@ -83,13 +81,10 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
 
         tree = Tree(shell, SWT.SINGLE or SWT.BORDER or SWT.V_SCROLL)
 
-        setTreeElements(jsonObject)
-
-        //val comp = Composite(shell, SWT.BORDER)
         content = Label(shell,SWT.BORDER)
         tree.addSelectionListener(object : SelectionAdapter() {
             override fun widgetSelected(e: SelectionEvent) {
-                content.text = tree.selection.first().data.toString()
+                content.text = passJsonElementToTextual(tree.selection.first().data as JsonElement)
                 content.pack()
                 shell.layout(true)
                 shell.pack()
@@ -98,19 +93,24 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
 
         val label = Text(shell, SWT.BORDER)
         label.layoutData = GridData(SWT.FILL, SWT.CENTER, false, false)
-        label.toolTipText = "Search in the Tree"
+        label.toolTipText = "Search in the Tree for JSONStrings"
         label.addModifyListener {
             tree.traverse {
-                it.checked = true
-                if (it.text.contains(label.text) && label.text != "")
-                    it.background = Color(233,233,143)
-                else
-                    it.background = Color(255,255,255)
+                var jsonElem = it.data
+                when (jsonElem) {
+                    is JsonString -> {
+                        if (jsonElem.value.contains(label.text) && label.text != ""){
+                            it.background = Color(233,233,143)
+                        }else{
+                            it.background = Color(255,255,255)
+                        }
+                    }
+                }
             }
         }
     }
 
-    private fun setTreeElements(jsonObject: JsonObject){
+    fun setTreeElements(jsonElement: JsonElement){
         val parents = mutableListOf<TreeItem>()
         var depth = -1
         val toTree = object : Visitor {
@@ -125,7 +125,7 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
                 }else {
                     jo.text = o.toString()
                 }
-                jo.data = passJsonElementToTextual(o)
+                jo.data = o
                 parents.add(jo)
                 depth++
                 return true
@@ -147,7 +147,7 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
                 }else {
                     ja.text = a.toString()
                 }
-                ja.data = passJsonElementToTextual(a)
+                ja.data = a
                 parents.add(ja)
                 depth++
                 return true
@@ -165,7 +165,7 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
                 }else {
                     js.text = "\"" + s.value + "\""
                 }
-                js.data = passJsonElementToTextual(s)
+                js.data = s
             }
 
             override fun visit(b: JsonBoolean) {
@@ -175,7 +175,7 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
                 }else {
                     jb.text = b.value.toString()
                 }
-                jb.data = passJsonElementToTextual(b)
+                jb.data = b
             }
             override fun visit(n: JsonNull) {
                 val jn = TreeItem(parents[depth], SWT.NONE)
@@ -184,7 +184,7 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
                 }else {
                     jn.text = n.value.toString()
                 }
-                jn.data = passJsonElementToTextual(n)
+                jn.data = n
             }
             override fun visit(i: JsonNumber) {
                 val ji = TreeItem(parents[depth], SWT.NONE)
@@ -193,13 +193,14 @@ class FileTreeSkeleton(jsonObject: JsonObject) {
                 }else {
                     ji.text = i.value.toString()
                 }
-                ji.data = passJsonElementToTextual(i)
+                ji.data = i
             }
         }
-        jsonObject.accept(toTree)
+        jsonElement.accept(toTree)
     }
 
-    fun open() {
+    fun openJsonUI(jsonElement: JsonElement) {
+        setTreeElements(jsonElement)
         tree.expandAll()
         shell.pack()
         shell.open()
