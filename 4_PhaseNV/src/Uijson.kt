@@ -108,7 +108,7 @@ class Uijson {
     @InjectApresentation
     private var setup: FrameSetup? = null
 
-    @InjectAdd
+    @InjectAction
     private var actions = mutableListOf<Action>()
 
     init {
@@ -244,7 +244,6 @@ class Uijson {
         }else{
             setup!!.execute(this,jsonElement)
         }
-        tree.expandAll()
         actions.forEach { action ->
             val button = Button(shell,SWT.PUSH)
             button.text = action.name
@@ -256,6 +255,7 @@ class Uijson {
                 }
             })
         }
+        tree.expandAll()
         shell.pack()
         shell.open()
         val display = Display.getDefault()
@@ -280,7 +280,7 @@ fun Tree.traverse(visitor: (TreeItem) -> Unit) {
     }
 }
 
-open class PutIcons : FrameSetup { //Associates icons with JSON Elements
+open class IconSetUp : FrameSetup { //Associates icons with JSON Elements
     private var rawImgFolder = Image(Display.getCurrent(),"4_Phase/Icons/Folder.png")
     private var rawImgFile = Image(Display.getCurrent(),"4_Phase/Icons/Text.png")
     val folderIcon: Image = Image(Display.getCurrent(),rawImgFolder.imageData.scaledTo(rawImgFolder.bounds.width/30,rawImgFolder.bounds.height/30))

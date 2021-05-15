@@ -11,7 +11,7 @@ import kotlin.reflect.jvm.isAccessible
 annotation class InjectApresentation
 
 @Target(AnnotationTarget.PROPERTY)
-annotation class InjectAdd
+annotation class InjectAction
 
 class Injector {
     companion object {
@@ -48,7 +48,7 @@ class Injector {
                         (it as KMutableProperty<*>).setter.call(o, obj)
                     }
                 }
-                if(it.hasAnnotation<InjectAdd>()){
+                if(it.hasAnnotation<InjectAction>()){
                     it.isAccessible = true
                     val key = type.simpleName + "." + it.name
                     val classList = it.getter.call(o) as MutableList<Any>

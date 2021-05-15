@@ -67,8 +67,8 @@ fun passJsonElementToTextual(objectJson: JsonElement): String {
             depth++
             return true
         }
-        override fun endvisitArray(o: JsonArray) {
-            jsonTextual = giveEndTextualToContinuosLineJsonElement(o,jsonTextual,depth)
+        override fun endvisitArray(a: JsonArray) {
+            jsonTextual = giveEndTextualToContinuosLineJsonElement(a,jsonTextual,depth)
             depth--
         }
         override fun visit(s: JsonString) {

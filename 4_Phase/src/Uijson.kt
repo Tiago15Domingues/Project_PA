@@ -1,8 +1,6 @@
 import org.eclipse.swt.SWT
 import org.eclipse.swt.events.SelectionAdapter
 import org.eclipse.swt.events.SelectionEvent
-import org.eclipse.swt.events.VerifyEvent
-import org.eclipse.swt.events.VerifyListener
 import org.eclipse.swt.graphics.Color
 import org.eclipse.swt.graphics.Image
 import org.eclipse.swt.layout.GridData
@@ -95,8 +93,8 @@ interface Action {
     fun execute(window: Uijson)
 }
 
-class Uijson() {
-    val shell: Shell
+class Uijson {
+    val shell: Shell = Shell(Display.getDefault())
     val tree: Tree
     val content: Label
 
@@ -107,7 +105,6 @@ class Uijson() {
     private var actions = mutableListOf<Action>()
 
     init {
-        shell = Shell(Display.getDefault())
         shell.setSize(450, 500)
         shell.setLocation(1200,100)
         shell.text = "JSON skeleton"
@@ -130,8 +127,7 @@ class Uijson() {
         label.toolTipText = "Search in the Tree for JSONStrings"
         label.addModifyListener {
             tree.traverse {
-                var jsonElem = it.data
-                when (jsonElem) {
+                when (val jsonElem = it.data) {
                     is JsonString -> {
                         if (jsonElem.value.contains(label.text) && label.text != ""){
                             it.background = Color(233,233,143)
@@ -149,7 +145,7 @@ class Uijson() {
         var depth = -1
         val toTree = object : Visitor {
             override fun visit(o: JsonObject): Boolean {
-                var res: String? = if (o.key != null) {
+                val res: String = if (o.key != null) {
                     "\"" + o.key + "\""
                 }else {
                     o.toString()
@@ -173,7 +169,7 @@ class Uijson() {
             }
 
             override fun visit(a: JsonArray): Boolean {
-                var res: String? = if (a.key != null) {
+                val res: String = if (a.key != null) {
                     "\"" + a.key + "\""
                 }else {
                     a.toString()
@@ -284,16 +280,16 @@ fun Tree.traverse(visitor: (TreeItem) -> Unit) {
 }
 
 open class DefaultSetUp : FrameSetup {
-    open override val folderIcon: Image?
+    override val folderIcon: Image?
         get() = null
-    open override val fileIcon: Image?
+    override val fileIcon: Image?
         get() = null
     override val propertiesKeyToUpdateNodeText: String?
         get() = null
 }
 
 open class IconSetUp : FrameSetup { //Associates items with JSON Elements | Change the name of JSONArrays/JSONObjects if they have a certain JSONElement with a certain key | Removes these JSONElements from the tree as they are already being represented in the parent
-    var rawImgFolder = Image(Display.getCurrent(),"4_Phase/Icons/Folder.png")
+    private var rawImgFolder = Image(Display.getCurrent(),"4_Phase/Icons/Folder.png")
     private var rawImgFile = Image(Display.getCurrent(),"4_Phase/Icons/Text.png")
     override val folderIcon: Image
         get() = Image(Display.getCurrent(),rawImgFolder.imageData.scaledTo(rawImgFolder.bounds.width/30,rawImgFolder.bounds.height/30))
@@ -342,12 +338,10 @@ class Edit: Action {
                 when (jsonSelected) {
                     is JsonNumber -> {
                         content.text = jsonSelected.value.toString()
-                        content.addVerifyListener(object : VerifyListener {
-                            override fun verifyText(e: VerifyEvent?) {
-                                var b = ("0123456789.".indexOf(e!!.text) >= 0)
-                                e.doit = b
-                            }
-                        })
+                        content.addVerifyListener { e ->
+                            val b = ("0123456789.".indexOf(e!!.text) >= 0)
+                            e.doit = b
+                        }
                         content.toolTipText = "Write a number only, otherwise the change will not be saved"
                     }
                     is JsonBoolean -> {
@@ -388,9 +382,9 @@ class Edit: Action {
                             if (content.text.equals("true", true) || content.text.equals("false", true)) {
                                 jsonSelected.value = content.text.toBoolean()
                                 if (jsonSelected.key != null) {
-                                    window.tree.selection.first().text = "\"" + jsonSelected.key + "\": " + content.text
+                                    window.tree.selection.first().text = "\"" + jsonSelected.key + "\": " + content.text.toBoolean()
                                 } else {
-                                    window.tree.selection.first().text = content.text
+                                    window.tree.selection.first().text = content.text.toBoolean().toString()
                                 }
                             }
                         }
@@ -422,10 +416,10 @@ class Write: Action {
     override fun execute(window: Uijson) {
         val jsonSelected = (window.tree.selection.first().data as JsonElement)
         val textual = passJsonElementToTextual(jsonSelected)
-        var file = if (jsonSelected.key != null)
-            File("4_Phase/" + jsonSelected.key + ".txt")
+        val file = if (jsonSelected.key != null)
+            File("4_PhaseNV/" + jsonSelected.key + ".txt")
         else
-            File("4_Phase/$jsonSelected.txt")
+            File("4_PhaseNV/$jsonSelected.txt")
         if (file.createNewFile())
             println("File created successfully")
         else
@@ -435,35 +429,40 @@ class Write: Action {
 }
 
 class Validate: Action {
+    private val keyToSearch = "name"
+
     override val name: String
         get() = "Validate"
     override val hintText: String
-        get() = "Validate if every JsonObjects/JsonArrays have \"PA\" with a string as a value"
+        get() = "Validate if every JsonObjects/JsonArrays have an a element (JSONString) with a key \"$keyToSearch\""
 
     override fun execute(window: Uijson) {
         var validate = false
-        window.tree.traverse { it ->
-            var jsonElem = it.data
-            when (jsonElem) {
+        window.tree.traverse {
+            when (val jsonElem = it.data) {
                 is JsonArray -> {
+                    validate = false
                     jsonElem.jsonArrayContent.forEach { it1->
-                        if (it1.key == "PA" && it1 is JsonString){
+                        if (it1.key == keyToSearch && it1 is JsonString){
                             validate = true
                         }
+                    }
+                    if (!validate){
+                        return@traverse
                     }
                 }
                 is JsonObject -> {
+                    validate = false
                     jsonElem.jsonObjectContent.forEach { it1->
-                        if (it1.key == "PA" && it1 is JsonString){
+                        if (it1.key == keyToSearch && it1 is JsonString){
                             validate = true
                         }
                     }
+                    if (!validate){
+                        return@traverse
+                    }
                 }
             }
-            if (!validate){
-                return@traverse
-            }
-            validate = false
         }
         window.shell.enabled = false
         val popUp = Shell(Display.getDefault())
@@ -473,7 +472,7 @@ class Validate: Action {
         popUp.text = "Validation"
         popUp.layout = RowLayout(SWT.VERTICAL or SWT.WRAP)
         val label = Label(popUp, SWT.NONE)
-        label.text = "Every JsonObjects/JsonArrays have \"PA\"? $validate"
+        label.text = "Every JsonObjects/JsonArrays have an element(JSONString) with the key \"$keyToSearch\"? $validate"
         popUp.pack()
         popUp.open()
         val display = Display.getCurrent()
@@ -490,44 +489,48 @@ class ChangeJsonDisplayMode: Action {
     override val name: String
         get() = "More"
     override val hintText: String
-        get() = "Alternative view for the selected object"
+        get() = "Alternative view for the selected object (Only for arrays and objects with only numbers)"
 
     override fun execute(window: Uijson) {
         val jsonSelected = (window.tree.selection.first().data as JsonElement)
-        val content = when (jsonSelected) {
-            is JsonArray -> {
-                jsonSelected.jsonArrayContent
-            }
-            is JsonObject -> {
-                jsonSelected.jsonObjectContent
-            }
-            else -> {
-                null
-            }
-        }
-        val listToPlot = mutableListOf<Number>()
-        val listToPlotNames = mutableListOf<String>()
-        var graphTitle = if (jsonSelected.key != null){
-            jsonSelected.key
-        }else{
-            jsonSelected.toString()
-        }
-        content!!.forEach {
-            if (it !is JsonNumber){
-                return@forEach
-            }else{
-                listToPlot.add(it.value)
-                if (it.key != null){
-                    listToPlotNames.add(it.key!!)
-                }else{
-                    listToPlotNames.add("x"+content.indexOf(it).toString())
+        if (jsonSelected is JsonArray || jsonSelected is JsonObject) {
+            val content = when (jsonSelected) {
+                is JsonArray -> {
+                    jsonSelected.jsonArrayContent
+                }
+                is JsonObject -> {
+                    jsonSelected.jsonObjectContent
+                }
+                else -> {
+                    null
                 }
             }
-        }
-        if (listToPlot.isNotEmpty()){
-            println(listToPlot)
-            println(graphTitle)
-            println(listToPlotNames)
+            val listToPlot = mutableListOf<Number>()
+            val listToPlotNames = mutableListOf<String>()
+            val graphTitle = if (jsonSelected.key != null) {
+                jsonSelected.key
+            } else {
+                jsonSelected.toString()
+            }
+            var cantPlot = false
+            content!!.forEach {
+                if (it !is JsonNumber) {
+                    cantPlot = true
+                    return@forEach
+                } else {
+                    listToPlot.add(it.value)
+                    if (it.key != null) {
+                        listToPlotNames.add(it.key!!)
+                    } else {
+                        listToPlotNames.add("x" + content.indexOf(it).toString())
+                    }
+                }
+            }
+            if (!cantPlot) {
+                println(listToPlot)
+                println(graphTitle)
+                println(listToPlotNames)
+            }
         }
     }
 }

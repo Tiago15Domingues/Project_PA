@@ -67,13 +67,12 @@ fun main() {
     Uijson().openJsonUI(jsonObject2)
 }
 
-class Uijson() {
-    val shell: Shell
+class Uijson{
+    val shell: Shell = Shell(Display.getDefault())
     val tree: Tree
     val content: Label
 
     init {
-        shell = Shell(Display.getDefault(),)
         shell.setSize(450, 500)
         shell.setLocation(1200,100)
         shell.text = "JSON skeleton"
@@ -95,9 +94,8 @@ class Uijson() {
         label.layoutData = GridData(SWT.FILL, SWT.CENTER, false, false)
         label.toolTipText = "Search in the Tree for JSONStrings"
         label.addModifyListener {
-            tree.traverse {
-                var jsonElem = it.data
-                when (jsonElem) {
+            tree.traverseTree {
+                when (val jsonElem = it.data) {
                     is JsonString -> {
                         if (jsonElem.value.contains(label.text) && label.text != ""){
                             it.background = Color(233,233,143)
@@ -110,21 +108,22 @@ class Uijson() {
         }
     }
 
-    fun setTreeElements(jsonElement: JsonElement){
+    private fun setTreeElementsDefault(jsonElement: JsonElement){
         val parents = mutableListOf<TreeItem>()
         var depth = -1
         val toTree = object : Visitor {
             override fun visit(o: JsonObject): Boolean {
+                val res: String = if (o.key != null) {
+                    "\"" + o.key + "\""
+                }else {
+                    o.toString()
+                }
                 val jo = if (depth == -1){
                     TreeItem(tree, SWT.NONE)
                 }else{
                     TreeItem(parents[depth], SWT.NONE)
                 }
-                if (o.key != null) {
-                    jo.text = "\"" + o.key + "\""
-                }else {
-                    jo.text = o.toString()
-                }
+                jo.text = res
                 jo.data = o
                 parents.add(jo)
                 depth++
@@ -137,16 +136,17 @@ class Uijson() {
             }
 
             override fun visit(a: JsonArray): Boolean {
+                val res: String = if (a.key != null) {
+                    "\"" + a.key + "\""
+                }else {
+                    a.toString()
+                }
                 val ja = if (depth == -1){
                     TreeItem(tree, SWT.NONE)
                 }else{
                     TreeItem(parents[depth], SWT.NONE)
                 }
-                if (a.key != null) {
-                    ja.text = "\"" + a.key + "\""
-                }else {
-                    ja.text = a.toString()
-                }
+                ja.text = res
                 ja.data = a
                 parents.add(ja)
                 depth++
@@ -162,7 +162,7 @@ class Uijson() {
                 val js = TreeItem(parents[depth], SWT.NONE)
                 if (s.key != null) {
                     js.text = "\"" + s.key + "\": " + "\"" + s.value + "\""
-                }else {
+                } else {
                     js.text = "\"" + s.value + "\""
                 }
                 js.data = s
@@ -200,8 +200,8 @@ class Uijson() {
     }
 
     fun openJsonUI(jsonElement: JsonElement) {
-        setTreeElements(jsonElement)
-        tree.expandAll()
+        setTreeElementsDefault(jsonElement)
+        tree.expandAllElements()
         shell.pack()
         shell.open()
         val display = Display.getDefault()
@@ -212,9 +212,9 @@ class Uijson() {
     }
 }
 
-fun Tree.expandAll() = traverse { it.expanded = true }
+fun Tree.expandAllElements() = traverseTree { it.expanded = true }
 
-fun Tree.traverse(visitor: (TreeItem) -> Unit) {
+fun Tree.traverseTree(visitor: (TreeItem) -> Unit) {
     fun TreeItem.traverse() {
         visitor(this)
         items.forEach {
