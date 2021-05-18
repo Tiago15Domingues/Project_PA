@@ -19,7 +19,7 @@ fun main() {
     jsonObject.setProperty("id",jsonNumber1)
     jsonObject.setProperty("name",jsonString1)
     jsonObject.setProperty("male", jsonBool1)
-    jsonObject.setProperty("smart", jsonNull1)
+    jsonObject.setProperty("smart:=?", jsonNull1)
 
     val jsonObject4 = JsonObject()
     val jsonNumber2 = JsonNumber(10)
@@ -527,29 +527,23 @@ class Write: Action {
         get() = "Write JsonTextual to a file"
 
     private val suffix = ".txt"
-    private val path = "4_PhaseNV/"
+    private val path = "4_Phase/"
+    private val regex = Regex("[^A-Za-z0-9 ]")
 
     override fun execute(window: Uijson) {
         val jsonSelected = (window.tree.selection.first().data as JsonElement)
         val textual = passJsonElementToTextual(jsonSelected)
-        val file = if (jsonSelected.key != null)
-            File(path + jsonSelected.key + suffix)
-        else
-            File(path + jsonSelected + suffix)
-        if (file.createNewFile())
-            println("File created successfully")
-        else {
-            fun autoRename(count: Int, firstFileName: String){
-                val newFile = File(path + firstFileName.substring(0, firstFileName.length - suffix.length) + "($count)" + suffix)
-                if (newFile.createNewFile()){
-                    println("File created successfully")
-                }else{
-                    autoRename(count+1,file.name)
-                }
-            }
-            autoRename(1,file.name)
+        val file = if (jsonSelected.key != null) {
+            File(path + regex.replace(jsonSelected.key!!, "") + suffix)
+        }else {
+            File(path + regex.replace(jsonSelected.toString(), "") + suffix)
         }
-        file.writeText(textual)
+        if (file.createNewFile()) {
+            file.writeText(textual)
+            println("File \"${file.name}\" created successfully")
+        } else {
+            autoRenameFile(1,file.name,path,suffix,textual)
+        }
     }
 }
 
