@@ -110,89 +110,50 @@ class Uijson{
 
     private fun setTreeElementsDefault(jsonElement: JsonElement){
         val parents = mutableListOf<TreeItem>()
-        var depth = -1
         val toTree = object : Visitor {
             override fun visit(o: JsonObject): Boolean {
-                val res: String = if (o.key != null) {
-                    "\"" + o.key + "\""
-                }else {
-                    o.toString()
-                }
-                val jo = if (depth == -1){
-                    TreeItem(tree, SWT.NONE)
-                }else{
-                    TreeItem(parents[depth], SWT.NONE)
-                }
-                jo.text = res
+                val jo = setParentInTree(tree,parents)
+                jo.text = keyForContinuousNode(o)
                 jo.data = o
                 parents.add(jo)
-                depth++
                 return true
             }
 
             override fun endvisitObject(o: JsonObject) {
-                depth--
                 parents.removeLast()
             }
 
             override fun visit(a: JsonArray): Boolean {
-                val res: String = if (a.key != null) {
-                    "\"" + a.key + "\""
-                }else {
-                    a.toString()
-                }
-                val ja = if (depth == -1){
-                    TreeItem(tree, SWT.NONE)
-                }else{
-                    TreeItem(parents[depth], SWT.NONE)
-                }
-                ja.text = res
+                val ja = setParentInTree(tree,parents)
+                ja.text = keyForContinuousNode(a)
                 ja.data = a
                 parents.add(ja)
-                depth++
                 return true
             }
 
             override fun endvisitArray(a: JsonArray) {
-                depth--
                 parents.removeLast()
             }
 
             override fun visit(s: JsonString) {
-                val js = TreeItem(parents[depth], SWT.NONE)
-                if (s.key != null) {
-                    js.text = "\"" + s.key + "\": " + "\"" + s.value + "\""
-                } else {
-                    js.text = "\"" + s.value + "\""
-                }
+                val js = TreeItem(parents[parents.size-1], SWT.NONE)
+                js.text = keyForEndNode(s) + "\"" + s.value + "\""
                 js.data = s
             }
 
             override fun visit(b: JsonBoolean) {
-                val jb = TreeItem(parents[depth], SWT.NONE)
-                if (b.key != null) {
-                    jb.text = "\"" + b.key + "\": " + b.value.toString()
-                }else {
-                    jb.text = b.value.toString()
-                }
+                val jb = TreeItem(parents[parents.size-1], SWT.NONE)
+                jb.text = keyForEndNode(b) + b.value.toString()
                 jb.data = b
             }
             override fun visit(n: JsonNull) {
-                val jn = TreeItem(parents[depth], SWT.NONE)
-                if (n.key != null) {
-                    jn.text = "\"" + n.key + "\": " + n.value.toString()
-                }else {
-                    jn.text = n.value.toString()
-                }
+                val jn = TreeItem(parents[parents.size-1], SWT.NONE)
+                jn.text = keyForEndNode(n) + n.value.toString()
                 jn.data = n
             }
             override fun visit(i: JsonNumber) {
-                val ji = TreeItem(parents[depth], SWT.NONE)
-                if (i.key != null) {
-                    ji.text = "\"" + i.key + "\": " + i.value.toString()
-                }else {
-                    ji.text = i.value.toString()
-                }
+                val ji = TreeItem(parents[parents.size-1], SWT.NONE)
+                ji.text = keyForEndNode(i) + i.value.toString()
                 ji.data = i
             }
         }

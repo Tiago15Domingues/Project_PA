@@ -17,6 +17,7 @@ abstract class JsonElement {
     abstract fun accept(v: Visitor)
 }
 
+
 class JsonObject : JsonElement() { //{ "name":"John", "age":30, "car":null }
     var jsonObjectContent = mutableListOf<JsonElement>()
 
