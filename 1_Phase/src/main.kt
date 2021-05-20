@@ -74,7 +74,7 @@ fun giveTabs(depthOfJsonElement: Int): String {
 fun giveTextualToEndLineJsonElement(elementJSON: JsonElement, rootTextualJsonElement: String, depthOfJsonElement: Int, JsonElementInQuestion:String): String {
     var jsonTextual = rootTextualJsonElement
     val parent = elementJSON.parent
-    jsonTextual +=  giveTabs(depthOfJsonElement) + keyForEndNode(elementJSON) + JsonElementInQuestion
+    jsonTextual +=  giveTabs(depthOfJsonElement) + elementJSON.keyToShow(false) + JsonElementInQuestion
     jsonTextual += if(depthOfJsonElement != 0 && (parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1] != elementJSON || parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON)){
         ",\n"
     }else {
@@ -103,7 +103,7 @@ fun giveEndTextualToContinuosLineJsonElement(elementJSON: JsonElement, rootTextu
 fun giveStartTextualToContinuosLineJsonElement(elementJSON: JsonElement, rootTextualJsonElement:String, depthOfJsonElement: Int): String {
     val keyways = if (elementJSON is JsonObject){"{"}else{"["}
     var jsonTextual = rootTextualJsonElement
-    jsonTextual += giveTabs(depthOfJsonElement) + keyForContinuousNode(elementJSON,false) + "$keyways\n"
+    jsonTextual += giveTabs(depthOfJsonElement) + elementJSON.keyToShow(false) + "$keyways\n"
     return jsonTextual
 }
 fun passJsonElementToTextual(objectJson: JsonElement): String {
@@ -158,7 +158,7 @@ fun findAllStrings(objectJson: JsonElement): MutableList<String> {
     println("All Strings -> " + findStrings.results) //Just to make sure everything is right (not necessary)
     return findStrings.results
 }
-fun findJsonObjectWithSpecificString(objectJson: JsonElement,stringToFind: String): MutableList<JsonElement> {
+fun findJsonObjectWithSpecificString(objectJson: JsonElement,string: String): MutableList<JsonElement> {
     val findObjectWithSpecificString = object : Visitor {
         var resultsToPrint = mutableListOf<Pair<String,JsonElement>>()
         var results = mutableListOf<JsonElement>() //Just to make sure everything is right (not necessary)
@@ -170,7 +170,7 @@ fun findJsonObjectWithSpecificString(objectJson: JsonElement,stringToFind: Strin
             return true
         }
         override fun visit(s: JsonString) {
-            if(s.value == stringToFind) {
+            if(s.value == string) {
                 if (!results.contains(obj)) {
                     results.add(obj)
                     if (s.key != null) stringKey = s.key //Just to make sure everything is right (not necessary)
@@ -182,10 +182,6 @@ fun findJsonObjectWithSpecificString(objectJson: JsonElement,stringToFind: Strin
     }
     objectJson.accept(findObjectWithSpecificString)
     val resultObjectList = findObjectWithSpecificString.resultsToPrint[0].second as JsonObject //Apenas para uma questão de prints e verificar se bate tudo certo
-    println("All object where is a String '$stringToFind' and their keys (Object | String) -> $resultObjectList") //Apenas para uma questão de prints e verificar se bate tudo certo
+    println("All object where is a String '$string' and their keys (Object | String) -> $resultObjectList") //Apenas para uma questão de prints e verificar se bate tudo certo
     return findObjectWithSpecificString.results
 }
-
-
-
-

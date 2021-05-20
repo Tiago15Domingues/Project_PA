@@ -30,8 +30,13 @@ class Injector {
                     }
                     map[parts[0]] = classList
                 }else{
-                    classList.add(Class.forName(parts[1]).kotlin)
-                    map[parts[0]] = classList
+                    if (parts[1] != "")
+                        try {
+                            classList.add(Class.forName(parts[1]).kotlin)
+                            map[parts[0]] = classList
+                        } catch (e: ClassNotFoundException) {
+                            throw ClassNotFoundException("In the configuration file, place only classes that use the \"Frame SetUp\" (place in \"Uijson.setup\") or \"Action\"(place in \"Uijson.actions\") interface")
+                        }
                 }
             }
             scanner.close()
@@ -43,9 +48,11 @@ class Injector {
                 if(it.hasAnnotation<InjectApresentation>()) {
                     it.isAccessible = true
                     val key = type.simpleName + "." + it.name
-                    if (map[key] != null) {
+                    if (map[key] != null && map[key]!!.isNotEmpty()) {
                         val obj = map[key]!![0].createInstance()
                         (it as KMutableProperty<*>).setter.call(o, obj)
+                    }else{
+                        (it as KMutableProperty<*>).setter.call(o, null)
                     }
                 }
                 if(it.hasAnnotation<InjectAction>()){

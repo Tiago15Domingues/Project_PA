@@ -8,7 +8,7 @@ fun giveTabs(depthOfJsonElement: Int): String {
 fun giveTextualToEndLineJsonElement(elementJSON: JsonElement, rootTextualJsonElement: String, depthOfJsonElement: Int, JsonElementInQuestion:String): String {
     var jsonTextual = rootTextualJsonElement
     val parent = elementJSON.parent
-    jsonTextual +=  giveTabs(depthOfJsonElement) + keyForEndNode(elementJSON) + JsonElementInQuestion
+    jsonTextual +=  giveTabs(depthOfJsonElement) + elementJSON.keyToShow(false) + JsonElementInQuestion
     jsonTextual += if(depthOfJsonElement != 0 && (parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1] != elementJSON || parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON)){
         ",\n"
     }else {
@@ -37,7 +37,7 @@ fun giveEndTextualToContinuosLineJsonElement(elementJSON: JsonElement, rootTextu
 fun giveStartTextualToContinuosLineJsonElement(elementJSON: JsonElement, rootTextualJsonElement:String, depthOfJsonElement: Int): String {
     val keyways = if (elementJSON is JsonObject){"{"}else{"["}
     var jsonTextual = rootTextualJsonElement
-    jsonTextual += giveTabs(depthOfJsonElement) + keyForContinuousNode(elementJSON,false) + "$keyways\n"
+    jsonTextual += giveTabs(depthOfJsonElement) + elementJSON.keyToShow(false) + "$keyways\n"
     return jsonTextual
 }
 fun passJsonElementToTextual(objectJson: JsonElement): String {

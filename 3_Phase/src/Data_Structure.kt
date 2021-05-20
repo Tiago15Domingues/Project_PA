@@ -84,19 +84,19 @@ class JsonArray(val value: Array<JsonElement>): JsonElement() { //{a, b, c}
     }
 }
 
-class JsonString(val value: String): JsonElement() { //"test"
+class JsonString(var value: String): JsonElement() { //"test"
     override fun accept(v: Visitor) {
         v.visit(this)
     }
 }
 
-class JsonNumber(val value: Number): JsonElement() { // 1
+class JsonNumber(var value: Number): JsonElement() { // 1
     override fun accept(v: Visitor) {
         v.visit(this)
     }
 }
 
-class JsonBoolean(val value: Boolean): JsonElement() { // "true/false"
+class JsonBoolean(var value: Boolean): JsonElement() { // "true/false"
 
     override fun accept(v: Visitor) {
         v.visit(this)

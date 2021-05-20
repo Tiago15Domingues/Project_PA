@@ -91,7 +91,9 @@ fun main() {
 }
 
 interface FrameSetup {
-    fun execute(window: Uijson, jsonElement: JsonElement)
+    fun setIcons(jsonElement: JsonElement): Image
+    fun changeText(jsonElement: JsonElement): String?
+    fun omitNodes(jsonElement: JsonElement): Boolean
 }
 
 interface Action {
@@ -104,9 +106,10 @@ class Uijson {
     val shell: Shell = Shell(Display.getDefault())
     val tree: Tree
     val content: Label
+    lateinit var jsonElementRoot: JsonElement
 
     @InjectApresentation
-    private var setup: FrameSetup? = null
+    var setup: Visualization? = null
 
     @InjectAction
     private var actions = mutableListOf<Action>()
@@ -150,10 +153,13 @@ class Uijson {
         val parents = mutableListOf<TreeItem>()
         val toTree = object : Visitor {
             override fun visit(o: JsonObject): Boolean {
-                val jo = setParentInTree(tree,parents)
-                jo.text = keyForContinuousNode(o)
-                jo.data = o
-                parents.add(jo)
+                if (setup?.omitNodes(o) != true) {
+                    val jo = setParentInTree(parents)
+                    jo.data = o
+                    jo.image = setup?.setIcons(o)
+                    jo.text = setup?.changeText(o) ?: o.keyToShow()
+                    parents.add(jo)
+                }
                 return true
             }
 
@@ -162,10 +168,13 @@ class Uijson {
             }
 
             override fun visit(a: JsonArray): Boolean {
-                val ja = setParentInTree(tree,parents)
-                ja.text = keyForContinuousNode(a)
-                ja.data = a
-                parents.add(ja)
+                if (setup?.omitNodes(a) != true) {
+                    val ja = setParentInTree(parents)
+                    ja.data = a
+                    ja.image = setup?.setIcons(a)
+                    ja.text = setup?.changeText(a) ?: a.keyToShow()
+                    parents.add(ja)
+                }
                 return true
             }
 
@@ -174,36 +183,44 @@ class Uijson {
             }
 
             override fun visit(s: JsonString) {
-                val js = TreeItem(parents[parents.size-1], SWT.NONE)
-                js.text = keyForEndNode(s) + "\"" + s.value + "\""
-                js.data = s
+                if (setup?.omitNodes(s) != true) {
+                    val js = TreeItem(parents[parents.size - 1], SWT.NONE)
+                    js.text = setup?.changeText(s) ?: s.keyToShow() + "\"" + s.value + "\""
+                    js.data = s
+                    js.image = setup?.setIcons(s)
+                }
             }
 
             override fun visit(b: JsonBoolean) {
-                val jb = TreeItem(parents[parents.size-1], SWT.NONE)
-                jb.text = keyForEndNode(b) + b.value.toString()
-                jb.data = b
+                if (setup?.omitNodes(b) != true) {
+                    val jb = TreeItem(parents[parents.size - 1], SWT.NONE)
+                    jb.text = setup?.changeText(b) ?: b.keyToShow() + b.value.toString()
+                    jb.data = b
+                    jb.image = setup?.setIcons(b)
+                }
             }
             override fun visit(n: JsonNull) {
-                val jn = TreeItem(parents[parents.size-1], SWT.NONE)
-                jn.text = keyForEndNode(n) + n.value.toString()
-                jn.data = n
+                if (setup?.omitNodes(n) != true) {
+                    val jn = TreeItem(parents[parents.size - 1], SWT.NONE)
+                    jn.text = setup?.changeText(n) ?: n.keyToShow() + n.value.toString()
+                    jn.data = n
+                    jn.image = setup?.setIcons(n)
+                }
             }
             override fun visit(i: JsonNumber) {
-                val ji = TreeItem(parents[parents.size-1], SWT.NONE)
-                ji.text = keyForEndNode(i) + i.value.toString()
-                ji.data = i
+                if (setup?.omitNodes(i) != true) {
+                    val ji = TreeItem(parents[parents.size - 1], SWT.NONE)
+                    ji.text = setup?.changeText(i) ?: i.keyToShow() + i.value.toString()
+                    ji.data = i
+                    ji.image = setup?.setIcons(i)
+                }
             }
         }
         jsonElement.accept(toTree)
     }
-
     fun openJsonUI(jsonElement: JsonElement) {
-        if (setup == null){
-            setTreeElementsDefault(jsonElement)
-        }else{
-            setup!!.execute(this,jsonElement)
-        }
+        jsonElementRoot = jsonElement
+        setTreeElementsDefault(jsonElement)
         actions.forEach { action ->
             val button = Button(shell,SWT.PUSH)
             button.text = action.name
@@ -240,189 +257,36 @@ fun Tree.traverse(visitor: (TreeItem) -> Unit) {
     }
 }
 
-open class IconSetUp : FrameSetup { //Associates icons with JSON Elements
+open class Visualization : FrameSetup { //Associates items with JSON Elements | Change the name of JSONArrays/JSONObjects if they have a certain JSONElement with a certain key | Removes these JSONElements from the tree as they are already being represented in the parent
     private var rawImgFolder = Image(Display.getCurrent(),"4_Phase/Icons/Folder.png")
     private var rawImgFile = Image(Display.getCurrent(),"4_Phase/Icons/Text.png")
-    val folderIcon: Image = Image(Display.getCurrent(),rawImgFolder.imageData.scaledTo(rawImgFolder.bounds.width/30,rawImgFolder.bounds.height/30))
-    val fileIcon: Image =  Image(Display.getCurrent(),rawImgFile.imageData.scaledTo(rawImgFile.bounds.width/30,rawImgFile.bounds.height/30))
-    override fun execute(window: Uijson, jsonElement: JsonElement) {
-        val parents = mutableListOf<TreeItem>()
-        val toTree = object : Visitor {
-            override fun visit(o: JsonObject): Boolean {
-                val jo = setParentInTree(window.tree,parents)
-                jo.text = keyForContinuousNode(o)
-                jo.data = o
-                jo.image = folderIcon
-                parents.add(jo)
-                return true
-            }
 
-            override fun endvisitObject(o: JsonObject) {
-                parents.removeLast()
-            }
+    private val propertiesKeyToUpdateNodeTextAndOmit: String = "town"
 
-            override fun visit(a: JsonArray): Boolean {
-                val ja = setParentInTree(window.tree,parents)
-                ja.text = keyForContinuousNode(a)
-                ja.data = a
-                ja.image = folderIcon
-                parents.add(ja)
-                return true
-            }
-
-            override fun endvisitArray(a: JsonArray) {
-                parents.removeLast()
-            }
-
-            override fun visit(s: JsonString) {
-                val js = TreeItem(parents[parents.size-1], SWT.NONE)
-                js.text = keyForEndNode(s) + "\"" + s.value + "\""
-                js.data = s
-                js.image = fileIcon
-            }
-
-            override fun visit(b: JsonBoolean) {
-                val jb = TreeItem(parents[parents.size-1], SWT.NONE)
-                jb.text = keyForEndNode(b) + b.value.toString()
-                jb.data = b
-                jb.image = fileIcon
-            }
-            override fun visit(n: JsonNull) {
-                val jn = TreeItem(parents[parents.size-1], SWT.NONE)
-                jn.text = keyForEndNode(n) + n.value.toString()
-                jn.data = n
-                jn.image = fileIcon
-            }
-            override fun visit(i: JsonNumber) {
-                val ji = TreeItem(parents[parents.size-1], SWT.NONE)
-                ji.text = keyForEndNode(i) + i.value.toString()
-                ji.data = i
-                ji.image = fileIcon
-            }
-        }
-        jsonElement.accept(toTree)
+    override fun setIcons(jsonElement: JsonElement): Image {
+        return if (jsonElement is JsonArray || jsonElement is JsonObject)
+            Image(Display.getCurrent(),rawImgFolder.imageData.scaledTo(rawImgFolder.bounds.width/30,rawImgFolder.bounds.height/30))
+        else
+            Image(Display.getCurrent(),rawImgFile.imageData.scaledTo(rawImgFile.bounds.width/30,rawImgFile.bounds.height/30))
     }
-}
 
-open class ChangeText : FrameSetup { //Change the name of JSONArrays/JSONObjects if they have a certain JSONElement with a certain key
-
-    val propertiesKeyToUpdateNodeText: String = "town"
-
-    override fun execute(window: Uijson, jsonElement: JsonElement) {
-        val parents = mutableListOf<TreeItem>()
-        val toTree = object : Visitor {
-            override fun visit(o: JsonObject): Boolean {
-                val jo = setParentInTree(window.tree,parents)
-                jo.text = keyForContinuousNode(o)
-                jo.data = o
-                parents.add(jo)
-                return true
+    override fun changeText(jsonElement: JsonElement): String? {
+        var newText: String? = null
+        return when (jsonElement) {
+            is JsonObject, is JsonArray -> {
+                val isThere = jsonElement.firstJsonElementWithCertainKeyInsideContinuosNode(propertiesKeyToUpdateNodeTextAndOmit)
+                if (isThere is JsonString)
+                    newText = isThere.value
+                newText
             }
-
-            override fun endvisitObject(o: JsonObject) {
-                parents.removeLast()
-            }
-
-            override fun visit(a: JsonArray): Boolean {
-                val ja = setParentInTree(window.tree,parents)
-                ja.text = keyForContinuousNode(a)
-                ja.data = a
-                parents.add(ja)
-                return true
-            }
-
-            override fun endvisitArray(a: JsonArray) {
-                parents.removeLast()
-            }
-
-            override fun visit(s: JsonString) {
-                val js = TreeItem(parents[parents.size-1], SWT.NONE)
-                js.text = keyForEndNode(s) + "\"" + s.value + "\""
-                js.data = s
-                if (s.key == propertiesKeyToUpdateNodeText) {
-                    parents[parents.size-1].text = s.value
-                }
-            }
-
-            override fun visit(b: JsonBoolean) {
-                val jb = TreeItem(parents[parents.size-1], SWT.NONE)
-                jb.text = keyForEndNode(b) + b.value.toString()
-                jb.data = b
-            }
-            override fun visit(n: JsonNull) {
-                val jn = TreeItem(parents[parents.size-1], SWT.NONE)
-                jn.text = keyForEndNode(n) + n.value.toString()
-                jn.data = n
-            }
-            override fun visit(i: JsonNumber) {
-                val ji = TreeItem(parents[parents.size-1], SWT.NONE)
-                ji.text = keyForEndNode(i) + i.value.toString()
-                ji.data = i
+            else -> {
+                null
             }
         }
-        jsonElement.accept(toTree)
     }
-}
 
-open class OmitNoKeysObjectsAndArrays : FrameSetup { //Remove all objects and arrays (and there nodes) that have no keys
-    override fun execute(window: Uijson, jsonElement: JsonElement) {
-        val parents = mutableListOf<TreeItem>()
-        val toTree = object : Visitor {
-            override fun visit(o: JsonObject): Boolean {
-                if (o.key != null){
-                    val jo = setParentInTree(window.tree,parents)
-                    jo.text = keyForContinuousNode(o)
-                    jo.data = o
-                    parents.add(jo)
-                }
-                return true
-            }
-
-            override fun endvisitObject(o: JsonObject) {
-                if (o.key != null) {
-                    parents.removeLast()
-                }
-            }
-
-            override fun visit(a: JsonArray): Boolean {
-                if (a.key != null){
-                    val ja = setParentInTree(window.tree,parents)
-                    ja.text = keyForContinuousNode(a)
-                    ja.data = a
-                    parents.add(ja)
-                }
-                return true
-            }
-
-            override fun endvisitArray(a: JsonArray) {
-                if (a.key != null) {
-                    parents.removeLast()
-                }
-            }
-
-            override fun visit(s: JsonString) {
-                val js = TreeItem(parents[parents.size-1], SWT.NONE)
-                js.text = keyForEndNode(s) + "\"" + s.value + "\""
-                js.data = s
-            }
-
-            override fun visit(b: JsonBoolean) {
-                val jb = TreeItem(parents[parents.size-1], SWT.NONE)
-                jb.text = keyForEndNode(b) + b.value.toString()
-                jb.data = b
-            }
-            override fun visit(n: JsonNull) {
-                val jn = TreeItem(parents[parents.size-1], SWT.NONE)
-                jn.text = keyForEndNode(n) + n.value.toString()
-                jn.data = n
-            }
-            override fun visit(i: JsonNumber) {
-                val ji = TreeItem(parents[parents.size-1], SWT.NONE)
-                ji.text = keyForEndNode(i) + i.value.toString()
-                ji.data = i
-            }
-        }
-        jsonElement.accept(toTree)
+    override fun omitNodes(jsonElement: JsonElement): Boolean {
+        return jsonElement is JsonString && jsonElement.key == propertiesKeyToUpdateNodeTextAndOmit
     }
 }
 
@@ -436,7 +300,7 @@ class Edit: Action {
         get() = "JsonArrays/JsonObjects with no keys && JsonNulls cant be changed"
 
     override fun execute(window: Uijson) {
-        val jsonSelected = (window.tree.selection.first().data as JsonElement)
+        val jsonSelected = window.getSelectedElementData()
         if(jsonSelected !is JsonNull && !(jsonSelected.key == null && jsonSelected is JsonObject) && !(jsonSelected.key == null && jsonSelected is JsonObject)) {
             window.shell.enabled = false
             val popUp = Shell(Display.getDefault())
@@ -481,11 +345,9 @@ class Edit: Action {
                     when (jsonSelected) {
                         is JsonObject, is JsonArray -> {
                             jsonSelected.key = content.text
-                            window.tree.selection.first().text = content.text
                         }
                         is JsonString -> {
                             jsonSelected.value = content.text
-                            window.tree.selection.first().text = keyForEndNode(jsonSelected) + "\"" + content.text + "\""
                         }
                         is JsonNumber -> {
                             if (content.text.toFloatOrNull() != null) {
@@ -493,17 +355,16 @@ class Edit: Action {
                                     jsonSelected.value = content.text.toIntOrNull()!!
                                 else
                                     jsonSelected.value = content.text.toFloatOrNull()!!
-                                window.tree.selection.first().text = keyForEndNode(jsonSelected) + content.text
                             }
                         }
                         is JsonBoolean -> {
                             if (content.text.equals("true", true) || content.text.equals("false", true)) {
                                 jsonSelected.value = content.text.toBoolean()
-                                window.tree.selection.first().text = keyForEndNode(jsonSelected) + content.text.toBoolean()
                             }
                         }
                     }
                     popUp.dispose()
+                    window.updateTreeText()
                     window.shell.enabled = true
                 }
             })
@@ -531,7 +392,7 @@ class Write: Action {
     private val regex = Regex("[^A-Za-z0-9 ]")
 
     override fun execute(window: Uijson) {
-        val jsonSelected = (window.tree.selection.first().data as JsonElement)
+        val jsonSelected = window.getSelectedElementData()
         val textual = passJsonElementToTextual(jsonSelected)
         val file = if (jsonSelected.key != null) {
             File(path + regex.replace(jsonSelected.key!!, "") + suffix)
@@ -611,7 +472,7 @@ class ChangeJsonDisplayMode: Action {
         get() = "Alternative view for the selected object (Only for arrays and objects with only numbers)"
 
     override fun execute(window: Uijson) {
-        val jsonSelected = (window.tree.selection.first().data as JsonElement)
+        val jsonSelected = window.getSelectedElementData()
         if (jsonSelected is JsonArray || jsonSelected is JsonObject) {
             val content = when (jsonSelected) {
                 is JsonArray -> {
