@@ -70,7 +70,7 @@ fun main() {
 class Uijson{
     val shell: Shell = Shell(Display.getDefault())
     val tree: Tree
-    val content: Label
+    private val content: Label
 
     init {
         shell.setSize(450, 500)
@@ -104,6 +104,14 @@ class Uijson{
                     }
                 }
             }
+        }
+    }
+
+    private fun setParentInTree (allTreeParents: MutableList<TreeItem>): TreeItem {
+        return if (allTreeParents.size == 0){
+            TreeItem(tree, SWT.NONE)
+        }else{
+            TreeItem(allTreeParents[allTreeParents.size-1], SWT.NONE)
         }
     }
 

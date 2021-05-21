@@ -16,11 +16,3 @@ fun JsonElement.keyToShow(forTree: Boolean ?= true): String {
         }
     }
 }
-
-fun Uijson.setParentInTree (allTreeParents: MutableList<TreeItem>): TreeItem {
-    return if (allTreeParents.size == 0){
-        TreeItem(tree, SWT.NONE)
-    }else{
-        TreeItem(allTreeParents[allTreeParents.size-1], SWT.NONE)
-    }
-}

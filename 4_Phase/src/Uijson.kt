@@ -87,13 +87,13 @@ fun main() {
     src.setProperty("83605",student1)
 
     val w = Injector.create(Uijson::class)
-    w.openJsonUI(jsonObject2)
+    w.openJsonUI(src)
 }
 
 interface FrameSetup {
-    fun setIcons(jsonElement: JsonElement): Image
+    fun setIcons(jsonElement: JsonElement): Image?
     fun changeText(jsonElement: JsonElement): String?
-    fun omitNodes(jsonElement: JsonElement): Boolean
+    fun omitNodes(jsonElement: JsonElement): Boolean?
 }
 
 interface Action {
@@ -105,7 +105,7 @@ interface Action {
 class Uijson {
     val shell: Shell = Shell(Display.getDefault())
     val tree: Tree
-    val content: Label
+    private val content: Label
     lateinit var jsonElementRoot: JsonElement
 
     @InjectApresentation
@@ -146,6 +146,14 @@ class Uijson {
                     }
                 }
             }
+        }
+    }
+
+    private fun setParentInTree (allTreeParents: MutableList<TreeItem>): TreeItem {
+        return if (allTreeParents.size == 0){
+            TreeItem(tree, SWT.NONE)
+        }else{
+            TreeItem(allTreeParents[allTreeParents.size-1], SWT.NONE)
         }
     }
 
@@ -261,9 +269,9 @@ open class Visualization : FrameSetup { //Associates items with JSON Elements | 
     private var rawImgFolder = Image(Display.getCurrent(),"4_Phase/Icons/Folder.png")
     private var rawImgFile = Image(Display.getCurrent(),"4_Phase/Icons/Text.png")
 
-    private val propertiesKeyToUpdateNodeTextAndOmit: String = "town"
+    private val propertiesKeyToUpdateNodeText: String = "town"
 
-    override fun setIcons(jsonElement: JsonElement): Image {
+    override fun setIcons(jsonElement: JsonElement): Image? {
         return if (jsonElement is JsonArray || jsonElement is JsonObject)
             Image(Display.getCurrent(),rawImgFolder.imageData.scaledTo(rawImgFolder.bounds.width/30,rawImgFolder.bounds.height/30))
         else
@@ -274,9 +282,11 @@ open class Visualization : FrameSetup { //Associates items with JSON Elements | 
         var newText: String? = null
         return when (jsonElement) {
             is JsonObject, is JsonArray -> {
-                val isThere = jsonElement.firstJsonElementWithCertainKeyInsideContinuosNode(propertiesKeyToUpdateNodeTextAndOmit)
-                if (isThere is JsonString)
-                    newText = isThere.value
+                val isThere = jsonElement.allJsonElementWithCertainKeyInsideContinuosNode(propertiesKeyToUpdateNodeText)
+                isThere?.forEach {
+                    if (it is JsonString)
+                        newText = it.value
+                }
                 newText
             }
             else -> {
@@ -285,8 +295,8 @@ open class Visualization : FrameSetup { //Associates items with JSON Elements | 
         }
     }
 
-    override fun omitNodes(jsonElement: JsonElement): Boolean {
-        return jsonElement is JsonString && jsonElement.key == propertiesKeyToUpdateNodeTextAndOmit
+    override fun omitNodes(jsonElement: JsonElement): Boolean? {
+        return jsonElement is JsonString && jsonElement.key == propertiesKeyToUpdateNodeText
     }
 }
 
@@ -403,7 +413,7 @@ class Write: Action {
             file.writeText(textual)
             println("File \"${file.name}\" created successfully")
         } else {
-            autoRenameFile(1,file.name,path,suffix,textual)
+            autoRenameFile(file.name,path,suffix,textual)
         }
     }
 }

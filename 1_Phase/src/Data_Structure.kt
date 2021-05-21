@@ -21,6 +21,26 @@ abstract class JsonElement {
 class JsonObject : JsonElement() { //{ "name":"John", "age":30, "car":null }
     var jsonObjectContent = mutableListOf<JsonElement>()
 
+    private fun setPropertyForArrayElement(value: JsonElement, array: JsonArray) {
+        var newjsonElement: JsonElement? = null
+        when (value) {
+            is JsonObject -> {
+                newjsonElement = JsonObject()
+                newjsonElement.jsonObjectContent = value.jsonObjectContent
+            }
+            is JsonArray -> {
+                newjsonElement = JsonArray(value.value)
+                newjsonElement.value.forEach { setPropertyForArrayElement(it, newjsonElement as JsonArray) }
+            }
+            is JsonString -> newjsonElement = JsonString(value.value)
+            is JsonBoolean -> newjsonElement = JsonBoolean(value.value)
+            is JsonNumber -> newjsonElement = JsonNumber(value.value)
+            is JsonNull -> newjsonElement = JsonNull(value.value)
+        }
+        newjsonElement!!.parent = array
+        array.jsonArrayContent.add(newjsonElement)
+    }
+
     fun setProperty(key: String, jsonElement: JsonElement) {
         var newjsonElement: JsonElement? = null
         when (jsonElement) {
@@ -30,7 +50,7 @@ class JsonObject : JsonElement() { //{ "name":"John", "age":30, "car":null }
             }
             is JsonArray -> {
                 newjsonElement = JsonArray(jsonElement.value)
-                newjsonElement.value.forEach { (newjsonElement as JsonArray).confirmProperty(it) }
+                newjsonElement.value.forEach { setPropertyForArrayElement(it, newjsonElement as JsonArray) }
             }
             is JsonString -> newjsonElement = JsonString(jsonElement.value)
             is JsonBoolean -> newjsonElement = JsonBoolean(jsonElement.value)
@@ -52,28 +72,8 @@ class JsonObject : JsonElement() { //{ "name":"John", "age":30, "car":null }
     }
 }
 
-class JsonArray(val value: Array<JsonElement>): JsonElement() { //{a, b, c}
+class JsonArray(var value: Array<JsonElement>): JsonElement() { //{a, b, c}
     var jsonArrayContent = mutableListOf<JsonElement>()
-
-    fun confirmProperty(value: JsonElement) {
-        var newjsonElement: JsonElement? = null
-        when (value) {
-            is JsonObject -> {
-                newjsonElement = JsonObject()
-                newjsonElement.jsonObjectContent = value.jsonObjectContent
-            }
-            is JsonArray -> {
-                newjsonElement = JsonArray(value.value)
-                newjsonElement.value.forEach { (newjsonElement as JsonArray).confirmProperty(it) }
-            }
-            is JsonString -> newjsonElement = JsonString(value.value)
-            is JsonBoolean -> newjsonElement = JsonBoolean(value.value)
-            is JsonNumber -> newjsonElement = JsonNumber(value.value)
-            is JsonNull -> newjsonElement = JsonNull(value.value)
-        }
-        newjsonElement!!.parent = this
-        this.jsonArrayContent.add(newjsonElement)
-    }
 
     override fun accept(v: Visitor) {
         if (v.visit(this)) {
@@ -85,26 +85,26 @@ class JsonArray(val value: Array<JsonElement>): JsonElement() { //{a, b, c}
     }
 }
 
-class JsonString(val value: String): JsonElement() { //"test"
+class JsonString(var value: String): JsonElement() { //"test"
     override fun accept(v: Visitor) {
         v.visit(this)
     }
 }
 
-class JsonNumber(val value: Number): JsonElement() { // 1
+class JsonNumber(var value: Number): JsonElement() { // 1
     override fun accept(v: Visitor) {
         v.visit(this)
     }
 }
 
-class JsonBoolean(val value: Boolean): JsonElement() { // "true/false"
+class JsonBoolean(var value: Boolean): JsonElement() { // "true/false"
 
     override fun accept(v: Visitor) {
         v.visit(this)
     }
 }
 
-class JsonNull(val value: NullType?): JsonElement() { // "null"
+class JsonNull(var value: NullType?): JsonElement() { // "null"
 
     override fun accept(v: Visitor) {
         v.visit(this)

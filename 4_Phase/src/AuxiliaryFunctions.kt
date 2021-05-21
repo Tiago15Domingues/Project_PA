@@ -1,5 +1,3 @@
-import org.eclipse.swt.SWT
-import org.eclipse.swt.widgets.TreeItem
 import java.io.File
 
 fun JsonElement.keyToShow(forTree: Boolean ?= true): String {
@@ -18,27 +16,28 @@ fun JsonElement.keyToShow(forTree: Boolean ?= true): String {
     }
 }
 
-fun JsonElement.firstJsonElementWithCertainKeyInsideContinuosNode(keyToSearch: String): JsonElement? {
+fun JsonElement.allJsonElementWithCertainKeyInsideContinuosNode(keyToSearch: String): MutableList<JsonElement>? {
+    val res = mutableListOf<JsonElement>()
     if (this is JsonObject || this is JsonArray){
-        var je: JsonElement? = null
         if (this is JsonObject){
             jsonObjectContent.forEach {
                 if (it.key == keyToSearch){
-                    je = it
-                    return@forEach
+                    res.add(it)
                 }
             }
         }else if (this is JsonArray){
             jsonArrayContent.forEach {
                 if (it.key == keyToSearch){
-                    je = it
-                    return@forEach
+                    res.add(it)
                 }
             }
         }
-        return je
+        return if (res.isEmpty())
+            null
+        else
+            res
     }else{
-        throw IllegalArgumentException("First argument must be a JsonObject or a JsonArray")
+        throw IllegalArgumentException("JsonElement that call the function must be a JsonObject or a JsonArray")
     }
 }
 
@@ -68,20 +67,15 @@ fun Uijson.updateTreeText(){
     }
 }
 
-fun Uijson.setParentInTree (allTreeParents: MutableList<TreeItem>): TreeItem {
-    return if (allTreeParents.size == 0){
-        TreeItem(tree, SWT.NONE)
-    }else{
-        TreeItem(allTreeParents[allTreeParents.size-1], SWT.NONE)
+fun autoRenameFile(firstFileName: String, path: String, suffix: String, toWrite: String) {
+    fun auxFun(count: Int, firstFileName: String, path: String, suffix: String, toWrite: String) {
+        val newFile = File(path + firstFileName.substring(0, firstFileName.length - suffix.length) + "($count)" + suffix)
+        if (newFile.createNewFile()) {
+            newFile.writeText(toWrite)
+            println("File \"${newFile.name}\" created successfully")
+        } else {
+            auxFun(count + 1, firstFileName, path, suffix, toWrite)
+        }
     }
-}
-
-fun autoRenameFile(count: Int, firstFileName: String, path: String, suffix: String, toWrite: String){
-    val newFile = File(path + firstFileName.substring(0, firstFileName.length - suffix.length) + "($count)" + suffix)
-    if (newFile.createNewFile()){
-        newFile.writeText(toWrite)
-        println("File \"${newFile.name}\" created successfully")
-    }else{
-        autoRenameFile(count+1,firstFileName,path,suffix,toWrite)
-    }
+    auxFun(1,firstFileName,path,suffix,toWrite)
 }

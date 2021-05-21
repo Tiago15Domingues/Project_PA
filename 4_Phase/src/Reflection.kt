@@ -10,46 +10,47 @@ annotation class NKey(val value: String)
 @Target(AnnotationTarget.PROPERTY)
 annotation class Exclude
 
-fun mapObject(o: KClassifier?, call: Any?): JsonElement {
-    var type : JsonElement = JsonNull(null)
-    if (call != null){
-        if(o == String::class || o == Enum::class){
-            type = JsonString(call.toString())
-        }else {
-            if (o == Int::class) {
-                type = JsonNumber(call as Number)
-            } else {
-                if (o == Boolean::class) {
-                    type = JsonBoolean(call as Boolean)
+fun getJSON(c:Any): Any {
+    fun mapObject(o: KClassifier?, call: Any?): JsonElement {
+        var type : JsonElement = JsonNull(null)
+        if (call != null){
+            if(o == String::class || o == Enum::class){
+                type = JsonString(call.toString())
+            }else {
+                if (o == Int::class) {
+                    type = JsonNumber(call as Number)
                 } else {
-                    if (o == Collection::class) {
-                        val jsonArray = mutableListOf<JsonElement>()
-                        (call as Collection<*>).toMutableList().forEach {
-                            jsonArray.add(mapObject(it!!.javaClass.kotlin,it))
-                        }
-                        type = JsonArray(jsonArray.toTypedArray())
+                    if (o == Boolean::class) {
+                        type = JsonBoolean(call as Boolean)
                     } else {
-                        if (o == HashMap::class) {
-                            val jsonObject = JsonObject()
-                            (call as HashMap<*, *>).entries.forEach {
-                                jsonObject.setProperty(it.key.toString(),mapObject(it.key.javaClass.kotlin,it.value))
+                        if (o == Collection::class) {
+                            val jsonArray = mutableListOf<JsonElement>()
+                            (call as Collection<*>).toMutableList().forEach {
+                                jsonArray.add(mapObject(it!!.javaClass.kotlin,it))
                             }
-                            type = jsonObject
+                            type = JsonArray(jsonArray.toTypedArray())
                         } else {
-                            if (o == Student::class) {
-                                type = getJSON(call) as JsonElement
+                            if (o == HashMap::class) {
+                                val jsonObject = JsonObject()
+                                (call as HashMap<*, *>).entries.forEach {
+                                    jsonObject.setProperty(it.key.toString(),mapObject(it.key.javaClass.kotlin,it.value))
+                                }
+                                type = jsonObject
+                            } else {
+                                if (o == Student::class) {
+                                    type = getJSON(call) as JsonElement
+                                }
                             }
                         }
                     }
                 }
             }
+        }else{
+            type = JsonNull(call)
         }
-    }else{
-        type = JsonNull(call)
+        return type
     }
-    return type
-}
-fun getJSON(c:Any): Any {
+
     return if (c is MutableList<*>) {
         val jsonArray = mutableListOf<JsonElement>()
         c.forEach { it1 ->

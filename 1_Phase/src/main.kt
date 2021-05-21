@@ -19,6 +19,7 @@ fun main(){
     val jsonObject6 = JsonObject()
     val jsonNumber3 = JsonNumber(30)
     val jsonArray = JsonArray(arrayOf(jsonNumber3,jsonObject4))
+    println(passJsonElementToTextual(jsonArray))
     jsonObject6.setProperty("NOTAS PA", jsonArray)
     jsonObject6.setProperty("NOTA PROG",jsonObject4)
 
@@ -63,50 +64,65 @@ fun main(){
     findJsonObjectWithSpecificString(jsonObject2,"Peka")
     println(passJsonElementToTextual(jsonObject2))
 
-}
-fun giveTabs(depthOfJsonElement: Int): String {
-    var tab = ""
-    for (i in 0 until depthOfJsonElement) {
-        tab += "\t"
-    }
-    return tab
-}
-fun giveTextualToEndLineJsonElement(elementJSON: JsonElement, rootTextualJsonElement: String, depthOfJsonElement: Int, JsonElementInQuestion:String): String {
-    var jsonTextual = rootTextualJsonElement
-    val parent = elementJSON.parent
-    jsonTextual +=  giveTabs(depthOfJsonElement) + elementJSON.keyToShow(false) + JsonElementInQuestion
-    jsonTextual += if(depthOfJsonElement != 0 && (parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1] != elementJSON || parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON)){
-        ",\n"
-    }else {
-        if(depthOfJsonElement != 0)
-            "\n"
-        else
-            ""
-    }
-    return jsonTextual
-}
-fun giveEndTextualToContinuosLineJsonElement(elementJSON: JsonElement, rootTextualJsonElement: String, depthOfJsonElement: Int): String {
-    val keyways = if (elementJSON is JsonObject){"}"}else{"]"}
-    val parent = elementJSON.parent
-    var jsonTextual = rootTextualJsonElement
-    jsonTextual += if ((depthOfJsonElement != 1 && parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1] != elementJSON) || (parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON && depthOfJsonElement != 1)) {
-        giveTabs(depthOfJsonElement-1) + "$keyways,\n"
-    } else {
-        if(parent == null || depthOfJsonElement == 1){
-            giveTabs(depthOfJsonElement-1) + keyways
-        }else {
-            giveTabs(depthOfJsonElement - 1) + "$keyways\n"
-        }
-    }
-    return jsonTextual
-}
-fun giveStartTextualToContinuosLineJsonElement(elementJSON: JsonElement, rootTextualJsonElement:String, depthOfJsonElement: Int): String {
-    val keyways = if (elementJSON is JsonObject){"{"}else{"["}
-    var jsonTextual = rootTextualJsonElement
-    jsonTextual += giveTabs(depthOfJsonElement) + elementJSON.keyToShow(false) + "$keyways\n"
-    return jsonTextual
+    val jo = JsonObject()
+    val jn = JsonNumber(123)
+    jo.setProperty("KeyFor 'jn'",jn)
+    val js = JsonString("Test")
+    val jb = JsonBoolean(true)
+    val jo2 = JsonObject()
+    val jN = JsonNull(null)
+    jo2.setProperty("KeyFor 'jN'",jN)
+    val ja = JsonArray(arrayOf(js,jb,jN,jo2))
+    jo.setProperty("KeyFor 'ja'",ja)
+
+    println(passJsonElementToTextual(jo))
+
+
+
 }
 fun passJsonElementToTextual(objectJson: JsonElement): String {
+    fun giveTabs(depthOfJsonElement: Int): String {
+        var tab = ""
+        for (i in 0 until depthOfJsonElement) {
+            tab += "\t"
+        }
+        return tab
+    }
+    fun giveTextualToEndLineJsonElement(elementJSON: JsonElement, rootTextualJsonElement: String, depthOfJsonElement: Int, JsonElementValue:String): String {
+        var jsonTextual = rootTextualJsonElement
+        val parent = elementJSON.parent
+        jsonTextual +=  giveTabs(depthOfJsonElement) + elementJSON.keyToShow(false) + JsonElementValue
+        jsonTextual += if(depthOfJsonElement != 0 && (parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1] != elementJSON || parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON)){
+            ",\n"
+        }else {
+            if(depthOfJsonElement != 0)
+                "\n"
+            else
+                ""
+        }
+        return jsonTextual
+    }
+    fun giveEndTextualToContinuosLineJsonElement(elementJSON: JsonElement, rootTextualJsonElement: String, depthOfJsonElement: Int): String {
+        val keyways = if (elementJSON is JsonObject){"}"}else{"]"}
+        val parent = elementJSON.parent
+        var jsonTextual = rootTextualJsonElement
+        jsonTextual += if ((depthOfJsonElement != 1 && parent is JsonObject && parent.jsonObjectContent[parent.jsonObjectContent.size-1] != elementJSON) || (parent is JsonArray && parent.jsonArrayContent[parent.jsonArrayContent.size-1] != elementJSON && depthOfJsonElement != 1)) {
+            giveTabs(depthOfJsonElement-1) + "$keyways,\n"
+        } else {
+            if(parent == null || depthOfJsonElement == 1){
+                giveTabs(depthOfJsonElement-1) + keyways
+            }else {
+                giveTabs(depthOfJsonElement - 1) + "$keyways\n"
+            }
+        }
+        return jsonTextual
+    }
+    fun giveStartTextualToContinuosLineJsonElement(elementJSON: JsonElement, rootTextualJsonElement:String, depthOfJsonElement: Int): String {
+        val keyways = if (elementJSON is JsonObject){"{"}else{"["}
+        var jsonTextual = rootTextualJsonElement
+        jsonTextual += giveTabs(depthOfJsonElement) + elementJSON.keyToShow(false) + "$keyways\n"
+        return jsonTextual
+    }
 
     val toTextual = object : Visitor {
         var jsonTextual = ""
@@ -145,7 +161,6 @@ fun passJsonElementToTextual(objectJson: JsonElement): String {
     objectJson.accept(toTextual)
     return toTextual.jsonTextual
 }
-
 fun findAllStrings(objectJson: JsonElement): MutableList<String> {
     val findStrings = object : Visitor {
         var results = mutableListOf<String>()
