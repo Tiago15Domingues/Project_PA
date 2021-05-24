@@ -22,40 +22,46 @@ class JsonObject : JsonElement() { //{ "name":"John", "age":30, "car":null }
     var jsonObjectContent = mutableListOf<JsonElement>()
 
     private fun setPropertyForArrayElement(value: JsonElement, array: JsonArray) {
-        var newjsonElement: JsonElement? = null
+        val newjsonElement: JsonElement?
         when (value) {
             is JsonObject -> {
                 newjsonElement = JsonObject()
-                newjsonElement.jsonObjectContent = value.jsonObjectContent
+                value.jsonObjectContent.forEach { newjsonElement.setProperty(it.key!!,it) }
             }
             is JsonArray -> {
                 newjsonElement = JsonArray(value.value)
-                newjsonElement.value.forEach { setPropertyForArrayElement(it, newjsonElement as JsonArray) }
+                newjsonElement.value.forEach { setPropertyForArrayElement(it, newjsonElement) }
             }
-            is JsonString -> newjsonElement = JsonString(value.value)
+            is JsonString -> {
+                newjsonElement = JsonString(value.value)
+            }
             is JsonBoolean -> newjsonElement = JsonBoolean(value.value)
             is JsonNumber -> newjsonElement = JsonNumber(value.value)
             is JsonNull -> newjsonElement = JsonNull(value.value)
+            else -> newjsonElement = null
         }
         newjsonElement!!.parent = array
         array.jsonArrayContent.add(newjsonElement)
     }
 
     fun setProperty(key: String, jsonElement: JsonElement) {
-        var newjsonElement: JsonElement? = null
+        val newjsonElement: JsonElement?
         when (jsonElement) {
             is JsonObject -> {
                 newjsonElement = JsonObject()
-                newjsonElement.jsonObjectContent = jsonElement.jsonObjectContent
+                jsonElement.jsonObjectContent.forEach { newjsonElement.setProperty(it.key!!,it) }
             }
             is JsonArray -> {
                 newjsonElement = JsonArray(jsonElement.value)
-                newjsonElement.value.forEach { setPropertyForArrayElement(it, newjsonElement as JsonArray) }
+                newjsonElement.value.forEach { setPropertyForArrayElement(it, newjsonElement) }
             }
-            is JsonString -> newjsonElement = JsonString(jsonElement.value)
+            is JsonString -> {
+                newjsonElement = JsonString(jsonElement.value)
+            }
             is JsonBoolean -> newjsonElement = JsonBoolean(jsonElement.value)
             is JsonNumber -> newjsonElement = JsonNumber(jsonElement.value)
             is JsonNull -> newjsonElement = JsonNull(jsonElement.value)
+            else -> newjsonElement = null
         }
         newjsonElement!!.parent = this
         newjsonElement.key = key

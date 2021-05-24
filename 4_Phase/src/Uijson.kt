@@ -87,7 +87,7 @@ fun main() {
     src.setProperty("83605",student1)
 
     val w = Injector.create(Uijson::class)
-    w.openJsonUI(src)
+    w.openJsonUI(jsonObject2)
 }
 
 interface FrameSetup {
@@ -311,7 +311,7 @@ class Edit: Action {
 
     override fun execute(window: Uijson) {
         val jsonSelected = window.getSelectedElementData()
-        if(jsonSelected !is JsonNull && !(jsonSelected.key == null && jsonSelected is JsonObject) && !(jsonSelected.key == null && jsonSelected is JsonObject)) {
+        if(jsonSelected !is JsonNull && !(jsonSelected.key == null && jsonSelected is JsonObject) && !(jsonSelected.key == null && jsonSelected is JsonArray)) {
             window.shell.enabled = false
             val popUp = Shell(Display.getDefault())
             popUp.setSize(150, 300)

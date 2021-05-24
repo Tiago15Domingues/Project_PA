@@ -115,6 +115,6 @@ fun findJsonObjectWithSpecificString(objectJson: JsonElement,string: String): Mu
     }
     objectJson.accept(findObjectWithSpecificString)
     val resultObjectList = findObjectWithSpecificString.resultsToPrint[0].second as JsonObject //Apenas para uma questão de prints e verificar se bate tudo certo
-    println("All object where is a String '$string' and their keys (Object | String) -> $resultObjectList") //Apenas para uma questão de prints e verificar se bate tudo certo
+    println("First object where is a String '$string' -> $resultObjectList") //Apenas para uma questão de prints e verificar se bate tudo certo
     return findObjectWithSpecificString.results
 }
